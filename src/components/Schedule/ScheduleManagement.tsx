@@ -22,40 +22,40 @@ const ScheduleManagement: React.FC = () => {
       id: '1',
       startTime: '08:00',
       endTime: '09:00',
-      subject: 'Mathématiques',
-      teacher: 'M. Traore',
+      subject: 'Français',
+      teacher: 'M. Traore (Enseignant unique)',
       classroom: 'Salle 12',
-      class: 'CM2A',
+      class: 'CI A',
       day: 'Lundi'
     },
     {
       id: '2',
       startTime: '09:00',
       endTime: '10:00',
-      subject: 'Français',
-      teacher: 'Mme Kone',
-      classroom: 'Salle 8',
-      class: 'CM2A',
+      subject: 'Mathématiques',
+      teacher: 'M. Traore (Enseignant unique)',
+      classroom: 'Salle 12',
+      class: 'CI A',
       day: 'Lundi'
     },
     {
       id: '3',
       startTime: '10:30',
       endTime: '11:30',
-      subject: 'Sciences',
-      teacher: 'M. Sidibe',
-      classroom: 'Labo 1',
-      class: 'CM2A',
+      subject: 'Éveil Scientifique',
+      teacher: 'M. Traore (Enseignant unique)',
+      classroom: 'Salle 12',
+      class: 'CI A',
       day: 'Lundi'
     },
     {
       id: '4',
       startTime: '08:00',
       endTime: '09:00',
-      subject: 'Histoire',
-      teacher: 'Mme Coulibaly',
-      classroom: 'Salle 15',
-      class: 'CM2A',
+      subject: 'Éducation Civique',
+      teacher: 'M. Traore (Enseignant unique)',
+      classroom: 'Salle 12',
+      class: 'CI A',
       day: 'Mardi'
     }
   ];
@@ -71,8 +71,13 @@ const ScheduleManagement: React.FC = () => {
     '16:00-17:00'
   ];
 
-  const classes = ['CM2A', 'CM2B', 'CM1A', 'CM1B', 'CE2A', 'CE2B', 'CE1A', 'CE1B'];
-  const teachers = ['M. Traore', 'Mme Kone', 'M. Sidibe', 'Mme Coulibaly', 'M. Sangare'];
+  const classes = ['Maternelle 1A', 'Maternelle 1B', 'CI A', 'CP1', 'CP2', 'CE1A', 'CE2B', 'CM2A'];
+  const teachers = [
+    { name: 'M. Traore', class: 'CI A' },
+    { name: 'Mme Kone', class: 'Maternelle 1A' },
+    { name: 'M. Sidibe', class: 'CE2B' },
+    { name: 'Mlle Coulibaly', class: 'Disponible' }
+  ];
 
   const getScheduleForSlot = (day: string, timeSlot: string) => {
     return timeSlots.find(slot => 
@@ -84,13 +89,18 @@ const ScheduleManagement: React.FC = () => {
 
   const getSubjectColor = (subject: string) => {
     const colors = {
-      'Mathématiques': 'bg-blue-100 text-blue-800 border-blue-200',
       'Français': 'bg-green-100 text-green-800 border-green-200',
+      'Mathématiques': 'bg-blue-100 text-blue-800 border-blue-200',
+      'Éveil Scientifique': 'bg-purple-100 text-purple-800 border-purple-200',
       'Sciences': 'bg-purple-100 text-purple-800 border-purple-200',
-      'Histoire': 'bg-orange-100 text-orange-800 border-orange-200',
-      'Anglais': 'bg-pink-100 text-pink-800 border-pink-200',
-      'Sport': 'bg-red-100 text-red-800 border-red-200',
-      'Arts': 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      'Histoire-Géographie': 'bg-orange-100 text-orange-800 border-orange-200',
+      'Éducation Civique': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'Éveil': 'bg-pink-100 text-pink-800 border-pink-200',
+      'Langage': 'bg-green-100 text-green-800 border-green-200',
+      'Graphisme': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+      'Jeux éducatifs': 'bg-red-100 text-red-800 border-red-200',
+      'Anglais': 'bg-teal-100 text-teal-800 border-teal-200',
+      'Dessin': 'bg-yellow-100 text-yellow-800 border-yellow-200'
     };
     return colors[subject as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
@@ -101,7 +111,7 @@ const ScheduleManagement: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Emploi du Temps</h1>
-          <p className="text-gray-600">Gestion des horaires, planification des cours et salles</p>
+          <p className="text-gray-600">Système d'enseignant unique - Planification par matière</p>
         </div>
         
         <div className="flex items-center space-x-3">
@@ -137,15 +147,15 @@ const ScheduleManagement: React.FC = () => {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Salles Utilisées</p>
-              <p className="text-2xl font-bold text-gray-800">28</p>
+              <p className="text-sm text-gray-600">Classes Actives</p>
+              <p className="text-2xl font-bold text-gray-800">21</p>
             </div>
             <div className="p-3 bg-green-50 rounded-xl">
               <Users className="h-6 w-6 text-green-600" />
             </div>
           </div>
           <div className="mt-4">
-            <span className="text-sm text-green-600 font-medium">85% occupation</span>
+            <span className="text-sm text-green-600 font-medium">1 enseignant/classe</span>
           </div>
         </div>
 
@@ -167,15 +177,15 @@ const ScheduleManagement: React.FC = () => {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Conflits</p>
-              <p className="text-2xl font-bold text-gray-800">3</p>
+              <p className="text-sm text-gray-600">Classes sans Enseignant</p>
+              <p className="text-2xl font-bold text-gray-800">2</p>
             </div>
             <div className="p-3 bg-red-50 rounded-xl">
               <span className="text-2xl">⚠️</span>
             </div>
           </div>
           <div className="mt-4">
-            <span className="text-sm text-red-600 font-medium">À résoudre</span>
+            <span className="text-sm text-red-600 font-medium">Affectation requise</span>
           </div>
         </div>
       </div>
@@ -240,6 +250,13 @@ const ScheduleManagement: React.FC = () => {
             <span>Filtres</span>
           </button>
         </div>
+        
+        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>Système Béninois:</strong> Un seul enseignant par classe assure toutes les matières. 
+            L'emploi du temps organise les matières par créneaux horaires.
+          </p>
+        </div>
       </div>
 
       {/* Schedule Grid */}
@@ -284,7 +301,9 @@ const ScheduleManagement: React.FC = () => {
                         {schedule ? (
                           <div className={`p-3 rounded-lg border-2 ${getSubjectColor(schedule.subject)} cursor-pointer hover:shadow-md transition-all group`}>
                             <div className="font-medium text-sm mb-1">{schedule.subject}</div>
-                            <div className="text-xs opacity-75 mb-1">{schedule.teacher}</div>
+                            <div className="text-xs opacity-75 mb-1">
+                              {schedule.teacher.split(' (')[0]}
+                            </div>
                             <div className="text-xs opacity-60">{schedule.classroom}</div>
                             
                             {/* Action buttons - shown on hover */}
@@ -314,22 +333,22 @@ const ScheduleManagement: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Conflicts and Issues */}
+        {/* Issues and Alerts */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Conflits à Résoudre</h3>
-            <span className="px-2 py-1 bg-red-50 text-red-700 rounded-full text-sm font-medium">3</span>
+            <h3 className="text-lg font-semibold text-gray-800">Alertes Système</h3>
+            <span className="px-2 py-1 bg-red-50 text-red-700 rounded-full text-sm font-medium">2</span>
           </div>
           
           <div className="space-y-3">
             <div className="p-3 border border-red-200 rounded-lg bg-red-50">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-medium text-red-800">Double réservation - Salle 12</p>
-                  <p className="text-sm text-red-600">Lundi 10:30 - M. Traore et Mme Kone</p>
+                  <p className="font-medium text-red-800">Classe sans enseignant</p>
+                  <p className="text-sm text-red-600">CP1 - 30 élèves sans enseignant assigné</p>
                 </div>
                 <button className="text-red-600 hover:text-red-800 text-sm font-medium">
-                  Résoudre
+                  Assigner
                 </button>
               </div>
             </div>
@@ -337,11 +356,11 @@ const ScheduleManagement: React.FC = () => {
             <div className="p-3 border border-yellow-200 rounded-lg bg-yellow-50">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-medium text-yellow-800">Enseignant indisponible</p>
-                  <p className="text-sm text-yellow-600">M. Sidibe - Mardi 14:00 (Formation)</p>
+                  <p className="font-medium text-yellow-800">Emploi du temps incomplet</p>
+                  <p className="text-sm text-yellow-600">CE1B - Seulement 18h/30h programmées</p>
                 </div>
                 <button className="text-yellow-600 hover:text-yellow-800 text-sm font-medium">
-                  Modifier
+                  Compléter
                 </button>
               </div>
             </div>
@@ -361,8 +380,8 @@ const ScheduleManagement: React.FC = () => {
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-800">Cours ajouté</p>
-                <p className="text-xs text-gray-500">Sciences - CM1A - Vendredi 15:00</p>
+                <p className="text-sm font-medium text-gray-800">Enseignant assigné</p>
+                <p className="text-xs text-gray-500">Mlle Coulibaly → CP1 (Enseignant unique)</p>
                 <p className="text-xs text-gray-400">Il y a 2 heures</p>
               </div>
             </div>
@@ -370,8 +389,8 @@ const ScheduleManagement: React.FC = () => {
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-800">Salle modifiée</p>
-                <p className="text-xs text-gray-500">Mathématiques CM2B - Salle 8 → Salle 15</p>
+                <p className="text-sm font-medium text-gray-800">Emploi du temps généré</p>
+                <p className="text-xs text-gray-500">CP1 - Planning automatique créé</p>
                 <p className="text-xs text-gray-400">Il y a 4 heures</p>
               </div>
             </div>
@@ -379,11 +398,35 @@ const ScheduleManagement: React.FC = () => {
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-800">Cours annulé</p>
-                <p className="text-xs text-gray-500">Anglais CE2A - Jeudi 16:00</p>
+                <p className="text-sm font-medium text-gray-800">Changement d'enseignant</p>
+                <p className="text-xs text-gray-500">CE2A - M. Diallo remplace Mme Bah</p>
                 <p className="text-xs text-gray-400">Hier</p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* System Benefits */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">Avantages du Système d'Enseignant Unique</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 bg-green-50 rounded-lg">
+            <h4 className="font-medium text-green-800 mb-2">Suivi Personnalisé</h4>
+            <p className="text-sm text-green-600">L'enseignant connaît parfaitement chaque élève</p>
+          </div>
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-medium text-blue-800 mb-2">Cohérence Pédagogique</h4>
+            <p className="text-sm text-blue-600">Approche unifiée dans toutes les matières</p>
+          </div>
+          <div className="p-4 bg-purple-50 rounded-lg">
+            <h4 className="font-medium text-purple-800 mb-2">Gestion Simplifiée</h4>
+            <p className="text-sm text-purple-600">Moins de coordination entre enseignants</p>
+          </div>
+          <div className="p-4 bg-orange-50 rounded-lg">
+            <h4 className="font-medium text-orange-800 mb-2">Relation Privilégiée</h4>
+            <p className="text-sm text-orange-600">Lien fort enseignant-élèves-parents</p>
           </div>
         </div>
       </div>

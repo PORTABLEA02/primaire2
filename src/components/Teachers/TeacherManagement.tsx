@@ -74,12 +74,7 @@ const TeacherManagement: React.FC = () => {
         <div className="flex items-center space-x-3">
           <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2">
             <Calendar className="h-4 w-4" />
-            <span 
-              onClick={() => window.location.hash = '#schedule'}
-              className="cursor-pointer"
-            >
-              Planning
-            </span>
+            <span>Planning</span>
           </button>
           
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
