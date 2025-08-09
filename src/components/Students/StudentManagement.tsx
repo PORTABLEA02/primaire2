@@ -19,6 +19,7 @@ import {
   BookOpen,
   User
 } from 'lucide-react';
+import AddStudentModal from './AddStudentModal';
 
 interface Student {
   id: string;
@@ -51,9 +52,8 @@ const StudentManagement: React.FC = () => {
   const [classFilter, setClassFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-
-  const students: Student[] = [
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [students, setStudents] = useState<Student[]>([
     {
       id: '1',
       firstName: 'Kofi',
@@ -144,7 +144,8 @@ const StudentManagement: React.FC = () => {
         { date: '2024-09-05', amount: 250000, description: 'Paiement partiel', method: 'Mobile Money' }
       ]
     }
-  ];
+  ]);
+
 
   const classes = ['Maternelle 1A', 'Maternelle 1B', 'CI A', 'CP1', 'CP2', 'CE1A', 'CE1B', 'CE2A', 'CE2B', 'CM1A', 'CM2A'];
 
@@ -173,6 +174,42 @@ const StudentManagement: React.FC = () => {
       case 'Partiel': return 'bg-yellow-50 text-yellow-700';
       default: return 'bg-gray-50 text-gray-700';
     }
+  };
+
+  const handleAddStudent = (studentData: any) => {
+    const newStudent: Student = {
+      id: (students.length + 1).toString(),
+      firstName: studentData.firstName,
+      lastName: studentData.lastName,
+      dateOfBirth: studentData.dateOfBirth,
+      class: studentData.class,
+      level: studentData.level,
+      parentName: studentData.parentName,
+      parentPhone: studentData.parentPhone,
+      parentEmail: studentData.parentEmail,
+      address: studentData.address,
+      enrollmentDate: studentData.enrollmentDate,
+      status: 'Actif',
+      paymentStatus: studentData.initialPayment >= studentData.totalFees ? 'À jour' : 
+                    studentData.initialPayment > 0 ? 'Partiel' : 'En retard',
+      outstandingAmount: studentData.totalFees - studentData.initialPayment,
+      totalFees: studentData.totalFees,
+      paidAmount: studentData.initialPayment,
+      lastPayment: studentData.initialPayment > 0 ? new Date().toISOString().split('T')[0] : undefined,
+      paymentHistory: studentData.initialPayment > 0 ? [
+        {
+          date: new Date().toISOString().split('T')[0],
+          amount: studentData.initialPayment,
+          description: 'Paiement d\'inscription',
+          method: studentData.paymentMethod
+        }
+      ] : []
+    };
+    
+    setStudents(prev => [...prev, newStudent]);
+    
+    // Notification de succès (optionnel)
+    console.log('Nouvel élève ajouté:', newStudent);
   };
 
   const StudentDetailModal = ({ student, onClose }: { student: Student; onClose: () => void }) => (
@@ -341,8 +378,7 @@ const StudentManagement: React.FC = () => {
           </button>
           
           <button 
-            onClick={() => setShowAddModal(true)}
-            onClick={() => setShowAddModal(true)}
+            onClick={() => setShowAddStudentModal(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
           >
             <Plus className="h-4 w-4" />
@@ -564,6 +600,13 @@ const StudentManagement: React.FC = () => {
           onClose={() => setSelectedStudent(null)} 
         />
       )}
+
+      {/* Add Student Modal */}
+      <AddStudentModal
+        isOpen={showAddStudentModal}
+        onClose={() => setShowAddStudentModal(false)}
+        onAddStudent={handleAddStudent}
+      />
     </div>
   );
 };
