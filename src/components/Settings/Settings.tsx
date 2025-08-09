@@ -5,6 +5,11 @@ import SchoolInfoModal from './SchoolInfoModal';
 import AcademicYearModal from './AcademicYearModal';
 import UserManagementModal from './UserManagementModal';
 import FinancialSettingsModal from './FinancialSettingsModal';
+import AcademicLevelsModal from './AcademicLevelsModal';
+import SecurityModal from './SecurityModal';
+import LogsModal from './LogsModal';
+import FinancialReportsModal from './FinancialReportsModal';
+import BackupModal from './BackupModal';
 
 const Settings: React.FC = () => {
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -84,6 +89,15 @@ const Settings: React.FC = () => {
     console.log('Paramètres financiers sauvegardés:', settings);
     // Ici vous pouvez implémenter la logique de sauvegarde
   };
+
+  const handleBackup = () => {
+    console.log('Création de sauvegarde...');
+    // Simulation de création de sauvegarde
+    setTimeout(() => {
+      alert('Sauvegarde créée avec succès !');
+    }, 2000);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -186,7 +200,10 @@ const Settings: React.FC = () => {
           <div className="p-4 border border-gray-100 rounded-lg">
             <h4 className="text-sm sm:text-base font-medium text-gray-800 mb-2">Dernière Sauvegarde</h4>
             <p className="text-xs sm:text-sm text-gray-600 mb-3">15 Octobre 2024 à 23:30</p>
-            <button className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base">
+            <button 
+              onClick={() => setActiveModal('backup')}
+              className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
+            >
               Créer une Sauvegarde
             </button>
           </div>
@@ -194,7 +211,10 @@ const Settings: React.FC = () => {
           <div className="p-4 border border-gray-100 rounded-lg">
             <h4 className="text-sm sm:text-base font-medium text-gray-800 mb-2">Journal d'Activité</h4>
             <p className="text-xs sm:text-sm text-gray-600 mb-3">Dernière connexion: Aujourd'hui 14:25</p>
-            <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base">
+            <button 
+              onClick={() => setActiveModal('logs')}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+            >
               Voir les Logs
             </button>
           </div>
@@ -223,6 +243,31 @@ const Settings: React.FC = () => {
         isOpen={activeModal === 'financial-settings'}
         onClose={() => setActiveModal(null)}
         onSave={handleSaveFinancialSettings}
+      />
+
+      <AcademicLevelsModal
+        isOpen={activeModal === 'academic-levels' || activeModal === 'subjects' || activeModal === 'schedule-config' || activeModal === 'report-templates'}
+        onClose={() => setActiveModal(null)}
+      />
+
+      <SecurityModal
+        isOpen={activeModal === 'security'}
+        onClose={() => setActiveModal(null)}
+      />
+
+      <LogsModal
+        isOpen={activeModal === 'logs'}
+        onClose={() => setActiveModal(null)}
+      />
+
+      <FinancialReportsModal
+        isOpen={activeModal === 'financial-reports'}
+        onClose={() => setActiveModal(null)}
+      />
+
+      <BackupModal
+        isOpen={activeModal === 'backup'}
+        onClose={() => setActiveModal(null)}
       />
     </div>
   );
