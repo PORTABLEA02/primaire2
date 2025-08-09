@@ -1,39 +1,82 @@
 import React from 'react';
+import { useState } from 'react';
 import { DollarSign, TrendingUp, AlertCircle, CreditCard, Smartphone, Building } from 'lucide-react';
+import PaymentModal from './PaymentModal';
+
+interface Payment {
+  id: string;
+  student: string;
+  class: string;
+  amount: string;
+  method: string;
+  date: string;
+  status: string;
+  type?: string;
+  month?: string;
+}
 
 const FinanceManagement: React.FC = () => {
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [recentPayments, setRecentPayments] = useState<Payment[]>([
+    {
+      id: '1',
+      student: 'Kofi Mensah',
+      class: 'CM2A',
+      amount: '45,000',
+      method: 'Mobile Money',
+      date: 'Aujourd\'hui 14:30',
+      status: 'Confirmé',
+      type: 'Mensualité',
+      month: 'Octobre 2024'
+    },
+    {
+      id: '2',
+      student: 'Fatima Diallo', 
+      class: 'CE1B',
+      amount: '40,000',
+      method: 'Espèces',
+      date: 'Aujourd\'hui 11:15',
+      status: 'Confirmé',
+      type: 'Mensualité',
+      month: 'Octobre 2024'
+    },
+    {
+      id: '3',
+      student: 'Amadou Kone',
+      class: 'CP2',
+      amount: '35,000', 
+      method: 'Virement',
+      date: 'Hier 16:45',
+      status: 'En attente',
+      type: 'Mensualité',
+      month: 'Octobre 2024'
+    }
+  ]);
+
   const paymentMethods = [
     { name: 'Espèces', amount: '1,250,000', percentage: 45, color: 'green', icon: DollarSign },
     { name: 'Mobile Money', amount: '980,000', percentage: 35, color: 'blue', icon: Smartphone },
     { name: 'Virement Bancaire', amount: '560,000', percentage: 20, color: 'purple', icon: Building }
   ];
 
-  const recentPayments = [
-    {
-      student: 'Kofi Mensah',
-      class: 'CM2A',
-      amount: '45,000',
-      method: 'Mobile Money',
-      date: 'Aujourd\'hui 14:30',
-      status: 'Confirmé'
-    },
-    {
-      student: 'Fatima Diallo', 
-      class: 'CE1B',
-      amount: '40,000',
-      method: 'Espèces',
-      date: 'Aujourd\'hui 11:15',
-      status: 'Confirmé'
-    },
-    {
-      student: 'Amadou Kone',
-      class: 'CP2',
-      amount: '35,000', 
-      method: 'Virement',
-      date: 'Hier 16:45',
-      status: 'En attente'
-    }
-  ];
+  const handleAddPayment = (paymentData: any) => {
+    const newPayment: Payment = {
+      id: (recentPayments.length + 1).toString(),
+      student: paymentData.studentName,
+      class: paymentData.studentClass,
+      amount: paymentData.amount.toLocaleString(),
+      method: paymentData.method,
+      date: 'Maintenant',
+      status: 'Confirmé',
+      type: paymentData.type,
+      month: paymentData.month
+    };
+    
+    setRecentPayments(prev => [newPayment, ...prev]);
+    
+    // Notification de succès (optionnel)
+    console.log('Nouveau paiement enregistré:', newPayment);
+  };
 
   return (
     <div className="space-y-6">
@@ -49,7 +92,10 @@ const FinanceManagement: React.FC = () => {
             Générer Rapport
           </button>
           
-          <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2">
+          <button 
+            onClick={() => setShowPaymentModal(true)}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+          >
             <DollarSign className="h-4 w-4" />
             <span>Nouveau Paiement</span>
           </button>
@@ -235,6 +281,13 @@ const FinanceManagement: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onAddPayment={handleAddPayment}
+      />
     </div>
   );
 };
