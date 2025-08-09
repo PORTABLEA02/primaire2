@@ -22,34 +22,34 @@ const FinanceManagement: React.FC = () => {
       id: '1',
       student: 'Kofi Mensah',
       class: 'CM2A',
-      amount: '45,000',
+      amount: '250,000',
       method: 'Mobile Money',
       date: 'Aujourd\'hui 14:30',
       status: 'Confirmé',
       type: 'Scolarité',
-      month: '1ère Tranche (Octobre)'
+      month: 'Solde scolarité'
     },
     {
       id: '2',
       student: 'Fatima Diallo', 
       class: 'CE1B',
-      amount: '40,000',
+      amount: '250,000',
       method: 'Espèces',
       date: 'Aujourd\'hui 11:15',
       status: 'Confirmé',
       type: 'Scolarité', 
-      month: '1ère Tranche (Octobre)'
+      month: 'Complément scolarité'
     },
     {
       id: '3',
       student: 'Amadou Kone',
       class: 'CP2',
-      amount: '35,000', 
+      amount: '100,000', 
       method: 'Virement',
       date: 'Hier 16:45',
       status: 'En attente',
       type: 'Scolarité',
-      month: '2ème Tranche (Janvier)'
+      month: 'Acompte scolarité'
     }
   ]);
 
@@ -107,8 +107,8 @@ const FinanceManagement: React.FC = () => {
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Revenus cette Tranche</p>
-              <p className="text-lg sm:text-2xl font-bold text-gray-800 break-words">2,450,000 <span className="text-xs sm:text-sm text-gray-500">FCFA</span></p>
+              <p className="text-sm text-gray-600">Revenus ce Mois</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-800 break-words">3,250,000 <span className="text-xs sm:text-sm text-gray-500">FCFA</span></p>
             </div>
             <div className="p-2 sm:p-3 bg-green-50 rounded-xl flex-shrink-0">
               <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
@@ -116,7 +116,7 @@ const FinanceManagement: React.FC = () => {
           </div>
           <div className="mt-4">
             <span className="text-xs sm:text-sm text-green-600 font-medium">+8.5%</span>
-            <span className="text-xs sm:text-sm text-gray-500 ml-1">vs tranche précédente</span>
+            <span className="text-xs sm:text-sm text-gray-500 ml-1">vs mois précédent</span>
           </div>
         </div>
 
@@ -132,6 +132,7 @@ const FinanceManagement: React.FC = () => {
           </div>
           <div className="mt-4">
             <span className="text-xs sm:text-sm text-yellow-600 font-medium">892,000 FCFA</span>
+            <span className="text-xs sm:text-sm text-gray-500 ml-1">montant total</span>
           </div>
         </div>
 
@@ -164,6 +165,7 @@ const FinanceManagement: React.FC = () => {
           </div>
           <div className="mt-4">
             <span className="text-xs sm:text-sm text-purple-600 font-medium">320,000 FCFA</span>
+            <span className="text-xs sm:text-sm text-gray-500 ml-1">réduction accordée</span>
           </div>
         </div>
       </div>
@@ -269,7 +271,7 @@ const FinanceManagement: React.FC = () => {
                 <td className="px-3 sm:px-6 py-4 text-sm sm:text-base font-semibold text-gray-800">150,000 FCFA</td>
                 <td className="px-3 sm:px-6 py-4 text-gray-600 hidden sm:table-cell">15 Oct 2024</td>
                 <td className="px-3 sm:px-6 py-4 hidden sm:table-cell">
-                  <span className="px-2 py-1 bg-red-50 text-red-700 rounded text-sm">1ère Tranche</span>
+                  <span className="px-2 py-1 bg-red-50 text-red-700 rounded text-sm">Scolarité en retard</span>
                 </td>
                 <td className="px-3 sm:px-6 py-4">
                   <button className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium">

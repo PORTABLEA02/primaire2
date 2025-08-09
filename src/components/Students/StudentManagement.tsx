@@ -38,11 +38,12 @@ interface Student {
   totalFees: number;
   paidAmount: number;
   lastPayment?: string;
-  tranchesStatus: {
-    tranche1: 'Payée' | 'En retard' | 'Non due';
-    tranche2: 'Payée' | 'En retard' | 'Non due';
-    tranche3: 'Payée' | 'En retard' | 'Non due';
-  };
+  paymentHistory: Array<{
+    date: string;
+    amount: number;
+    description: string;
+    method: string;
+  }>;
 }
 
 const StudentManagement: React.FC = () => {
@@ -68,14 +69,13 @@ const StudentManagement: React.FC = () => {
       status: 'Actif',
       paymentStatus: 'À jour',
       outstandingAmount: 0,
-      totalFees: 450000,
-      paidAmount: 200000,
+      totalFees: 450000, // CM2
+      paidAmount: 450000,
       lastPayment: '2024-10-15',
-      tranchesStatus: {
-        tranche1: 'Payée',
-        tranche2: 'Non due',
-        tranche3: 'Non due'
-      }
+      paymentHistory: [
+        { date: '2024-09-15', amount: 200000, description: '1ère tranche', method: 'Mobile Money' },
+        { date: '2024-10-15', amount: 250000, description: 'Solde scolarité', method: 'Espèces' }
+      ]
     },
     {
       id: '2',
@@ -92,14 +92,13 @@ const StudentManagement: React.FC = () => {
       status: 'Actif',
       paymentStatus: 'À jour',
       outstandingAmount: 0,
-      totalFees: 400000,
-      paidAmount: 200000,
+      totalFees: 400000, // CE1
+      paidAmount: 400000,
       lastPayment: '2024-10-12',
-      tranchesStatus: {
-        tranche1: 'Payée',
-        tranche2: 'Non due',
-        tranche3: 'Non due'
-      }
+      paymentHistory: [
+        { date: '2024-09-10', amount: 150000, description: 'Acompte rentrée', method: 'Virement' },
+        { date: '2024-10-12', amount: 250000, description: 'Complément scolarité', method: 'Espèces' }
+      ]
     },
     {
       id: '3',
@@ -115,15 +114,13 @@ const StudentManagement: React.FC = () => {
       enrollmentDate: '2024-09-01',
       status: 'Actif',
       paymentStatus: 'En retard',
-      outstandingAmount: 150000,
-      totalFees: 350000,
-      paidAmount: 50000,
+      outstandingAmount: 250000,
+      totalFees: 350000, // CP
+      paidAmount: 100000,
       lastPayment: '2024-09-15',
-      tranchesStatus: {
-        tranche1: 'En retard',
-        tranche2: 'Non due',
-        tranche3: 'Non due'
-      }
+      paymentHistory: [
+        { date: '2024-09-15', amount: 100000, description: 'Acompte inscription', method: 'Espèces' }
+      ]
     },
     {
       id: '4',
@@ -139,15 +136,13 @@ const StudentManagement: React.FC = () => {
       enrollmentDate: '2024-09-01',
       status: 'Actif',
       paymentStatus: 'Partiel',
-      outstandingAmount: 75000,
-      totalFees: 400000,
-      paidAmount: 125000,
+      outstandingAmount: 150000,
+      totalFees: 400000, // CE2
+      paidAmount: 250000,
       lastPayment: '2024-10-08',
-      tranchesStatus: {
-        tranche1: 'Payée',
-        tranche2: 'Non due',
-        tranche3: 'Non due'
-      }
+      paymentHistory: [
+        { date: '2024-09-05', amount: 250000, description: 'Paiement partiel', method: 'Mobile Money' }
+      ]
     }
   ];
 
@@ -177,15 +172,6 @@ const StudentManagement: React.FC = () => {
       case 'En retard': return 'bg-red-50 text-red-700';
       case 'Partiel': return 'bg-yellow-50 text-yellow-700';
       default: return 'bg-gray-50 text-gray-700';
-    }
-  };
-
-  const getTrancheStatusColor = (status: string) => {
-    switch (status) {
-      case 'Payée': return 'bg-green-100 text-green-800';
-      case 'En retard': return 'bg-red-100 text-red-800';
-      case 'Non due': return 'bg-gray-100 text-gray-600';
-      default: return 'bg-gray-100 text-gray-600';
     }
   };
 
@@ -299,37 +285,27 @@ const StudentManagement: React.FC = () => {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">État des Tranches</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Historique des Paiements</h3>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                    <div>
-                      <span className="font-medium text-gray-800">1ère Tranche (Octobre)</span>
-                      <p className="text-sm text-gray-500">150,000 FCFA</p>
+                  {student.paymentHistory.length > 0 ? (
+                    student.paymentHistory.map((payment, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                        <div>
+                          <span className="font-medium text-gray-800">{payment.description}</span>
+                          <p className="text-sm text-gray-500">
+                            {new Date(payment.date).toLocaleDateString('fr-FR')} • {payment.method}
+                          </p>
+                        </div>
+                        <span className="font-bold text-green-600">
+                          {payment.amount.toLocaleString()} FCFA
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-gray-500">
+                      <p>Aucun paiement enregistré</p>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTrancheStatusColor(student.tranchesStatus.tranche1)}`}>
-                      {student.tranchesStatus.tranche1}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                    <div>
-                      <span className="font-medium text-gray-800">2ème Tranche (Janvier)</span>
-                      <p className="text-sm text-gray-500">150,000 FCFA</p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTrancheStatusColor(student.tranchesStatus.tranche2)}`}>
-                      {student.tranchesStatus.tranche2}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                    <div>
-                      <span className="font-medium text-gray-800">3ème Tranche (Avril)</span>
-                      <p className="text-sm text-gray-500">150,000 FCFA</p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTrancheStatusColor(student.tranchesStatus.tranche3)}`}>
-                      {student.tranchesStatus.tranche3}
-                    </span>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>

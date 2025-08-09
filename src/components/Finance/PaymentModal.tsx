@@ -95,18 +95,23 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
 
   const paymentTypes = [
     { value: 'Inscription', label: 'Frais d\'inscription', amount: 50000 },
-    { value: 'Scolarité', label: 'Scolarité annuelle (tranche)', amount: 150000 },
+    { value: 'Scolarité', label: 'Paiement de scolarité (tranche)', amount: 0 },
     { value: 'Cantine', label: 'Frais de cantine', amount: 25000 },
     { value: 'Transport', label: 'Frais de transport', amount: 15000 },
     { value: 'Fournitures', label: 'Fournitures scolaires', amount: 20000 },
     { value: 'Autre', label: 'Autre paiement', amount: 0 }
   ];
 
-  const tranches = [
-    { value: '1', label: '1ère Tranche (Octobre)', amount: 150000 },
-    { value: '2', label: '2ème Tranche (Janvier)', amount: 150000 },
-    { value: '3', label: '3ème Tranche (Avril)', amount: 150000 }
-  ];
+  // Frais de scolarité annuels par niveau
+  const scolariteAnnuelle = {
+    'Maternelle': 300000,
+    'CI': 350000,
+    'CP': 350000,
+    'CE1': 400000,
+    'CE2': 400000,
+    'CM1': 450000,
+    'CM2': 450000
+  };
 
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -132,10 +137,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
       newErrors.bankDetails = 'Détails bancaires requis pour le virement';
     }
 
-    if (paymentData.type === 'Scolarité' && !paymentData.month) {
-      newErrors.month = 'Veuillez sélectionner la tranche';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -153,11 +154,20 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
 
   const handlePaymentTypeChange = (type: string) => {
     const paymentType = paymentTypes.find(pt => pt.value === type);
-    setPaymentData(prev => ({
-      ...prev,
-      type: type as PaymentData['type'],
-      amount: paymentType?.amount || 0
-    }));
+    if (type === 'Scolarité') {
+      // Pour la scolarité, on ne prédéfinit pas le montant
+      setPaymentData(prev => ({
+        ...prev,
+        type: type as PaymentData['type'],
+        amount: 0
+      }));
+    } else {
+      setPaymentData(prev => ({
+        ...prev,
+        type: type as PaymentData['type'],
+        amount: paymentType?.amount || 0
+      }));
+    }
   };
 
   const handleSubmit = () => {
@@ -374,29 +384,33 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
                 {/* Month (for Mensualité) */}
                 {paymentData.type === 'Scolarité' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tranche *
-                    </label>
-                    <select
-                      value={paymentData.month || ''}
-                      onChange={(e) => {
-                        const selectedTranche = tranches.find(t => t.value === e.target.value);
-                        setPaymentData(prev => ({ 
-                          ...prev, 
-                          month: selectedTranche?.label || '',
-                          amount: selectedTranche?.amount || prev.amount
-                        }));
-                      }}
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.month ? 'border-red-300' : 'border-gray-200'
-                      }`}
-                    >
-                      <option value="">Sélectionner la tranche</option>
-                      {tranches.map(tranche => (
-                        <option key={tranche.value} value={tranche.value}>{tranche.label}</option>
-                      ))}
-                    </select>
-                    {errors.month && <p className="text-red-500 text-sm mt-1">Veuillez sélectionner la tranche</p>}
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <h4 className="font-medium text-blue-800 mb-2">Information Scolarité</h4>
+                      {selectedStudent && (
+                        <div className="space-y-2 text-sm text-blue-700">
+                          <p><strong>Classe:</strong> {selectedStudent.class}</p>
+                          <p><strong>Frais annuels:</strong> {scolariteAnnuelle[selectedStudent.level as keyof typeof scolariteAnnuelle]?.toLocaleString() || 'Non défini'} FCFA</p>
+                          <p><strong>Déjà payé:</strong> {(selectedStudent.outstandingAmount > 0 ? 
+                            (scolariteAnnuelle[selectedStudent.level as keyof typeof scolariteAnnuelle] - selectedStudent.outstandingAmount) : 
+                            scolariteAnnuelle[selectedStudent.level as keyof typeof scolariteAnnuelle]
+                          )?.toLocaleString()} FCFA</p>
+                          <p><strong>Reste à payer:</strong> {selectedStudent.outstandingAmount.toLocaleString()} FCFA</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Description de la tranche (optionnel)
+                      </label>
+                      <input
+                        type="text"
+                        value={paymentData.month || ''}
+                        onChange={(e) => setPaymentData(prev => ({ ...prev, month: e.target.value }))}
+                        placeholder="Ex: 1ère tranche, Paiement partiel octobre..."
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
                   </div>
                 )}
 
