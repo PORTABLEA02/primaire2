@@ -1,17 +1,24 @@
 import React from 'react';
+import { useState } from 'react';
 import { Settings as SettingsIcon, Users, Calendar, DollarSign, BookOpen, Shield, Database } from 'lucide-react';
+import SchoolInfoModal from './SchoolInfoModal';
+import AcademicYearModal from './AcademicYearModal';
+import UserManagementModal from './UserManagementModal';
+import FinancialSettingsModal from './FinancialSettingsModal';
 
 const Settings: React.FC = () => {
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+
   const settingsSections = [
     {
       title: 'Configuration Générale',
       icon: SettingsIcon,
       color: 'blue',
       settings: [
-        'Informations de l\'école',
-        'Année scolaire active', 
-        'Périodes et trimestres',
-        'Seuil de promotion'
+        { name: 'Informations de l\'école', action: 'school-info' },
+        { name: 'Année scolaire active', action: 'academic-year' }, 
+        { name: 'Périodes et trimestres', action: 'academic-year' },
+        { name: 'Seuil de promotion', action: 'academic-config' }
       ]
     },
     {
@@ -19,10 +26,10 @@ const Settings: React.FC = () => {
       icon: Users,
       color: 'green',
       settings: [
-        'Comptes utilisateurs',
-        'Rôles et permissions',
-        'Sécurité des accès',
-        'Historique des connexions'
+        { name: 'Comptes utilisateurs', action: 'user-management' },
+        { name: 'Rôles et permissions', action: 'user-management' },
+        { name: 'Sécurité des accès', action: 'security' },
+        { name: 'Historique des connexions', action: 'logs' }
       ]
     },
     {
@@ -30,10 +37,10 @@ const Settings: React.FC = () => {
       icon: BookOpen,
       color: 'purple',
       settings: [
-        'Niveaux et classes',
-        'Matières enseignées',
-        'Emplois du temps',
-        'Modèles de bulletins'
+        { name: 'Niveaux et classes', action: 'academic-levels' },
+        { name: 'Matières enseignées', action: 'subjects' },
+        { name: 'Emplois du temps', action: 'schedule-config' },
+        { name: 'Modèles de bulletins', action: 'report-templates' }
       ]
     },
     {
@@ -41,10 +48,10 @@ const Settings: React.FC = () => {
       icon: DollarSign,
       color: 'yellow',
       settings: [
-        'Types de frais',
-        'Méthodes de paiement',
-        'Mobile Money',
-        'Rapports financiers'
+        { name: 'Types de frais', action: 'financial-settings' },
+        { name: 'Méthodes de paiement', action: 'financial-settings' },
+        { name: 'Mobile Money', action: 'financial-settings' },
+        { name: 'Rapports financiers', action: 'financial-reports' }
       ]
     }
   ];
@@ -59,6 +66,24 @@ const Settings: React.FC = () => {
     return colorMap[color as keyof typeof colorMap] || colorMap.blue;
   };
 
+  const handleSettingClick = (action: string) => {
+    setActiveModal(action);
+  };
+
+  const handleSaveSchoolInfo = (schoolData: any) => {
+    console.log('Informations école sauvegardées:', schoolData);
+    // Ici vous pouvez implémenter la logique de sauvegarde
+  };
+
+  const handleSaveAcademicYear = (yearData: any) => {
+    console.log('Année scolaire sauvegardée:', yearData);
+    // Ici vous pouvez implémenter la logique de sauvegarde
+  };
+
+  const handleSaveFinancialSettings = (settings: any) => {
+    console.log('Paramètres financiers sauvegardés:', settings);
+    // Ici vous pouvez implémenter la logique de sauvegarde
+  };
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -81,7 +106,10 @@ const Settings: React.FC = () => {
               <p className="text-sm sm:text-base text-gray-600">2024-2025 • Du 1er Octobre 2024 au 30 Juin 2025</p>
             </div>
           </div>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base w-full sm:w-auto">
+          <button 
+            onClick={() => handleSettingClick('academic-year')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base w-full sm:w-auto"
+          >
             Modifier
           </button>
         </div>
@@ -103,8 +131,12 @@ const Settings: React.FC = () => {
               
               <div className="space-y-3">
                 {section.settings.map((setting, settingIndex) => (
-                  <div key={settingIndex} className="flex items-center justify-between p-2 sm:p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                    <span className="text-sm sm:text-base text-gray-700">{setting}</span>
+                  <div 
+                    key={settingIndex} 
+                    onClick={() => handleSettingClick(setting.action)}
+                    className="flex items-center justify-between p-2 sm:p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    <span className="text-sm sm:text-base text-gray-700">{setting.name}</span>
                     <span className="text-gray-400">→</span>
                   </div>
                 ))}
@@ -168,6 +200,30 @@ const Settings: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <SchoolInfoModal
+        isOpen={activeModal === 'school-info'}
+        onClose={() => setActiveModal(null)}
+        onSave={handleSaveSchoolInfo}
+      />
+
+      <AcademicYearModal
+        isOpen={activeModal === 'academic-year'}
+        onClose={() => setActiveModal(null)}
+        onSave={handleSaveAcademicYear}
+      />
+
+      <UserManagementModal
+        isOpen={activeModal === 'user-management'}
+        onClose={() => setActiveModal(null)}
+      />
+
+      <FinancialSettingsModal
+        isOpen={activeModal === 'financial-settings'}
+        onClose={() => setActiveModal(null)}
+        onSave={handleSaveFinancialSettings}
+      />
     </div>
   );
 };
