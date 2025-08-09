@@ -13,7 +13,7 @@ const activities = [
   {
     type: 'paiement',
     title: 'Paiement reçu',
-    description: 'Mensualité octobre - Fatima Diallo (CE1B) - 45,000 FCFA',
+    description: '1ère Tranche - Fatima Diallo (CE1B) - 150,000 FCFA',
     time: 'Il y a 3 heures',
     icon: DollarSign,
     color: 'green'
@@ -29,7 +29,7 @@ const activities = [
   {
     type: 'alerte',
     title: 'Paiement en retard',
-    description: 'Mensualité septembre - Amadou Kone (CP2)',
+    description: '1ère Tranche - Amadou Kone (CP2)',
     time: 'Il y a 1 jour',
     icon: AlertCircle,
     color: 'orange'

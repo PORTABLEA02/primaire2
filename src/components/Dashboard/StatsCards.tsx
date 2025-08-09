@@ -19,7 +19,7 @@ const statsData = [
     color: 'green'
   },
   {
-    title: 'Revenus ce Mois',
+    title: 'Revenus cette Tranche',
     value: '2,450,000 FCFA',
     change: '+8.5%',
     changeType: 'increase',
@@ -67,7 +67,7 @@ const StatsCards: React.FC = () => {
               }`}>
                 {stat.change}
               </span>
-              <span className="text-xs sm:text-sm text-gray-500 ml-2">par rapport au mois dernier</span>
+              <span className="text-xs sm:text-sm text-gray-500 ml-2">par rapport à la tranche précédente</span>
             </div>
           </div>
         );

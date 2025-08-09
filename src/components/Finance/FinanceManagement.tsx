@@ -26,8 +26,8 @@ const FinanceManagement: React.FC = () => {
       method: 'Mobile Money',
       date: 'Aujourd\'hui 14:30',
       status: 'Confirmé',
-      type: 'Mensualité',
-      month: 'Octobre 2024'
+      type: 'Scolarité',
+      month: '1ère Tranche (Octobre)'
     },
     {
       id: '2',
@@ -37,8 +37,8 @@ const FinanceManagement: React.FC = () => {
       method: 'Espèces',
       date: 'Aujourd\'hui 11:15',
       status: 'Confirmé',
-      type: 'Mensualité',
-      month: 'Octobre 2024'
+      type: 'Scolarité', 
+      month: '1ère Tranche (Octobre)'
     },
     {
       id: '3',
@@ -48,8 +48,8 @@ const FinanceManagement: React.FC = () => {
       method: 'Virement',
       date: 'Hier 16:45',
       status: 'En attente',
-      type: 'Mensualité',
-      month: 'Octobre 2024'
+      type: 'Scolarité',
+      month: '2ème Tranche (Janvier)'
     }
   ]);
 
@@ -107,7 +107,7 @@ const FinanceManagement: React.FC = () => {
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Revenus ce Mois</p>
+              <p className="text-sm text-gray-600">Revenus cette Tranche</p>
               <p className="text-lg sm:text-2xl font-bold text-gray-800 break-words">2,450,000 <span className="text-xs sm:text-sm text-gray-500">FCFA</span></p>
             </div>
             <div className="p-2 sm:p-3 bg-green-50 rounded-xl flex-shrink-0">
@@ -116,7 +116,7 @@ const FinanceManagement: React.FC = () => {
           </div>
           <div className="mt-4">
             <span className="text-xs sm:text-sm text-green-600 font-medium">+8.5%</span>
-            <span className="text-xs sm:text-sm text-gray-500 ml-1">vs mois dernier</span>
+            <span className="text-xs sm:text-sm text-gray-500 ml-1">vs tranche précédente</span>
           </div>
         </div>
 
@@ -266,10 +266,10 @@ const FinanceManagement: React.FC = () => {
                 <td className="px-3 sm:px-6 py-4">
                   <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-sm">CE2A</span>
                 </td>
-                <td className="px-3 sm:px-6 py-4 text-sm sm:text-base font-semibold text-gray-800">45,000 FCFA</td>
-                <td className="px-3 sm:px-6 py-4 text-gray-600 hidden sm:table-cell">15 Sept 2024</td>
+                <td className="px-3 sm:px-6 py-4 text-sm sm:text-base font-semibold text-gray-800">150,000 FCFA</td>
+                <td className="px-3 sm:px-6 py-4 text-gray-600 hidden sm:table-cell">15 Oct 2024</td>
                 <td className="px-3 sm:px-6 py-4 hidden sm:table-cell">
-                  <span className="px-2 py-1 bg-red-50 text-red-700 rounded text-sm">21 jours</span>
+                  <span className="px-2 py-1 bg-red-50 text-red-700 rounded text-sm">1ère Tranche</span>
                 </td>
                 <td className="px-3 sm:px-6 py-4">
                   <button className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium">

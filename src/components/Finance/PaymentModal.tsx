@@ -95,17 +95,17 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
 
   const paymentTypes = [
     { value: 'Inscription', label: 'Frais d\'inscription', amount: 50000 },
-    { value: 'Mensualité', label: 'Mensualité scolaire', amount: 45000 },
+    { value: 'Scolarité', label: 'Scolarité annuelle (tranche)', amount: 150000 },
     { value: 'Cantine', label: 'Frais de cantine', amount: 25000 },
     { value: 'Transport', label: 'Frais de transport', amount: 15000 },
     { value: 'Fournitures', label: 'Fournitures scolaires', amount: 20000 },
     { value: 'Autre', label: 'Autre paiement', amount: 0 }
   ];
 
-  const months = [
-    'Octobre 2024', 'Novembre 2024', 'Décembre 2024',
-    'Janvier 2025', 'Février 2025', 'Mars 2025',
-    'Avril 2025', 'Mai 2025', 'Juin 2025'
+  const tranches = [
+    { value: '1', label: '1ère Tranche (Octobre)', amount: 150000 },
+    { value: '2', label: '2ème Tranche (Janvier)', amount: 150000 },
+    { value: '3', label: '3ème Tranche (Avril)', amount: 150000 }
   ];
 
   const filteredStudents = students.filter(student =>
@@ -132,8 +132,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
       newErrors.bankDetails = 'Détails bancaires requis pour le virement';
     }
 
-    if (paymentData.type === 'Mensualité' && !paymentData.month) {
-      newErrors.month = 'Veuillez sélectionner le mois';
+    if (paymentData.type === 'Scolarité' && !paymentData.month) {
+      newErrors.month = 'Veuillez sélectionner la tranche';
     }
 
     setErrors(newErrors);
@@ -372,24 +372,31 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
                 </div>
 
                 {/* Month (for Mensualité) */}
-                {paymentData.type === 'Mensualité' && (
+                {paymentData.type === 'Scolarité' && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Mois *
+                      Tranche *
                     </label>
                     <select
                       value={paymentData.month || ''}
-                      onChange={(e) => setPaymentData(prev => ({ ...prev, month: e.target.value }))}
+                      onChange={(e) => {
+                        const selectedTranche = tranches.find(t => t.value === e.target.value);
+                        setPaymentData(prev => ({ 
+                          ...prev, 
+                          month: selectedTranche?.label || '',
+                          amount: selectedTranche?.amount || prev.amount
+                        }));
+                      }}
                       className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                         errors.month ? 'border-red-300' : 'border-gray-200'
                       }`}
                     >
-                      <option value="">Sélectionner le mois</option>
-                      {months.map(month => (
-                        <option key={month} value={month}>{month}</option>
+                      <option value="">Sélectionner la tranche</option>
+                      {tranches.map(tranche => (
+                        <option key={tranche.value} value={tranche.value}>{tranche.label}</option>
                       ))}
                     </select>
-                    {errors.month && <p className="text-red-500 text-sm mt-1">{errors.month}</p>}
+                    {errors.month && <p className="text-red-500 text-sm mt-1">Veuillez sélectionner la tranche</p>}
                   </div>
                 )}
 
