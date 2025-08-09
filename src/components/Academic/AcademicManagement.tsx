@@ -1,12 +1,14 @@
 import React from 'react';
 import { BookOpen, FileText, Calculator, Award, TrendingUp } from 'lucide-react';
 import GradeEntryModal from './GradeEntryModal';
+import CalculateAveragesModal from './CalculateAveragesModal';
 
 const AcademicManagement: React.FC = () => {
   const [selectedClass, setSelectedClass] = React.useState('');
   const [selectedSubject, setSelectedSubject] = React.useState('');
   const [selectedPeriod, setSelectedPeriod] = React.useState('Trimestre 1');
   const [showGradeEntryModal, setShowGradeEntryModal] = React.useState(false);
+  const [showCalculateAveragesModal, setShowCalculateAveragesModal] = React.useState(false);
 
   const subjects = [
     { name: 'Français', classes: 12, notes: 456, average: 12.8 },
@@ -64,6 +66,7 @@ const AcademicManagement: React.FC = () => {
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2 text-sm sm:text-base">
+            onClick={() => setShowCalculateAveragesModal(true)}
             <Calculator className="h-4 w-4" />
             <span>Calculer Moyennes</span>
           </button>
@@ -298,6 +301,12 @@ const AcademicManagement: React.FC = () => {
         selectedClass={selectedClass}
         selectedSubject={selectedSubject}
         selectedPeriod={selectedPeriod}
+      />
+
+      {/* Calculate Averages Modal */}
+      <CalculateAveragesModal
+        isOpen={showCalculateAveragesModal}
+        onClose={() => setShowCalculateAveragesModal(false)}
       />
     </div>
   );
