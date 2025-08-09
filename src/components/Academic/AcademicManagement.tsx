@@ -1,7 +1,13 @@
 import React from 'react';
 import { BookOpen, FileText, Calculator, Award, TrendingUp } from 'lucide-react';
+import GradeEntryModal from './GradeEntryModal';
 
 const AcademicManagement: React.FC = () => {
+  const [selectedClass, setSelectedClass] = React.useState('');
+  const [selectedSubject, setSelectedSubject] = React.useState('');
+  const [selectedPeriod, setSelectedPeriod] = React.useState('Trimestre 1');
+  const [showGradeEntryModal, setShowGradeEntryModal] = React.useState(false);
+
   const subjects = [
     { name: 'Français', classes: 12, notes: 456, average: 12.8 },
     { name: 'Mathématiques', classes: 12, notes: 445, average: 11.2 },
@@ -36,6 +42,16 @@ const AcademicManagement: React.FC = () => {
       average: 12.5
     }
   ];
+
+  const classes = ['CM2A', 'CM2B', 'CM1A', 'CE2B', 'CE1A', 'CP1', 'CP2', 'CI A'];
+  const subjectOptions = ['Français', 'Mathématiques', 'Sciences', 'Histoire-Géographie', 'Anglais', 'Éducation Civique'];
+  const periods = ['Trimestre 1', 'Trimestre 2', 'Trimestre 3'];
+
+  const handleStartGradeEntry = () => {
+    if (selectedClass && selectedSubject) {
+      setShowGradeEntryModal(true);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -209,36 +225,80 @@ const AcademicManagement: React.FC = () => {
         
         <div className="p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <select className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>Sélectionner une classe</option>
-              <option>CM2A</option>
-              <option>CM2B</option>
-              <option>CM1A</option>
+            <select 
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Sélectionner une classe</option>
+              {classes.map(cls => (
+                <option key={cls} value={cls}>{cls}</option>
+              ))}
             </select>
             
-            <select className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>Sélectionner une matière</option>
-              <option>Français</option>
-              <option>Mathématiques</option>
-              <option>Sciences</option>
+            <select 
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Sélectionner une matière</option>
+              {subjectOptions.map(subject => (
+                <option key={subject} value={subject}>{subject}</option>
+              ))}
             </select>
             
-            <select className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>Trimestre 1</option>
-              <option>Trimestre 2</option>
-              <option>Trimestre 3</option>
+            <select 
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {periods.map(period => (
+                <option key={period} value={period}>{period}</option>
+              ))}
             </select>
           </div>
           
-          <div className="text-center py-8">
-            <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-sm sm:text-base text-gray-500">Sélectionnez une classe et une matière pour commencer la saisie des notes</p>
-            <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base">
-              Commencer la Saisie
-            </button>
-          </div>
+          {selectedClass && selectedSubject ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="h-8 w-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Prêt pour la Saisie</h3>
+              <p className="text-gray-600 mb-4">
+                Classe: <strong>{selectedClass}</strong> • Matière: <strong>{selectedSubject}</strong> • Période: <strong>{selectedPeriod}</strong>
+              </p>
+              <button 
+                onClick={handleStartGradeEntry}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium"
+              >
+                Commencer la Saisie
+              </button>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-sm sm:text-base text-gray-500">Sélectionnez une classe et une matière pour commencer la saisie des notes</p>
+              <div className="mt-4 space-y-2">
+                {!selectedClass && (
+                  <p className="text-sm text-red-500">• Veuillez sélectionner une classe</p>
+                )}
+                {!selectedSubject && (
+                  <p className="text-sm text-red-500">• Veuillez sélectionner une matière</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Grade Entry Modal */}
+      <GradeEntryModal
+        isOpen={showGradeEntryModal}
+        onClose={() => setShowGradeEntryModal(false)}
+        selectedClass={selectedClass}
+        selectedSubject={selectedSubject}
+        selectedPeriod={selectedPeriod}
+      />
     </div>
   );
 };
