@@ -1,9 +1,11 @@
 import React from 'react';
 import { Plus, Users, Calendar, Settings } from 'lucide-react';
 import AddClassModal from './AddClassModal';
+import TeacherAssignmentModal from './TeacherAssignmentModal';
 
 const ClassManagement: React.FC = () => {
   const [showAddModal, setShowAddModal] = React.useState(false);
+  const [showAssignmentModal, setShowAssignmentModal] = React.useState(false);
   const [classes, setClasses] = React.useState([
     { 
       id: '1',
@@ -137,6 +139,20 @@ const ClassManagement: React.FC = () => {
     // Afficher une notification de succès (optionnel)
     console.log('Nouvelle classe créée:', newClass);
   };
+
+  const handleTeacherAssignment = (assignments: any[]) => {
+    // Ici vous pouvez implémenter la logique de sauvegarde des affectations
+    console.log('Affectations d\'enseignants:', assignments);
+    
+    // Simulation de mise à jour des classes
+    assignments.forEach(assignment => {
+      console.log(`${assignment.teacherName} assigné à ${assignment.className}`);
+    });
+    
+    // Notification de succès
+    alert(`${assignments.length} affectation(s) enregistrée(s) avec succès !`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -304,7 +320,10 @@ const ClassManagement: React.FC = () => {
             <h3 className="text-base sm:text-lg font-semibold text-gray-800">Affectation des Enseignants</h3>
             <p className="text-sm sm:text-base text-gray-600">Système d'enseignant unique - Un enseignant par classe pour toutes les matières</p>
           </div>
-          <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base whitespace-nowrap">
+          <button 
+            onClick={() => setShowAssignmentModal(true)}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base whitespace-nowrap"
+          >
             Gérer les Affectations
           </button>
         </div>
@@ -331,6 +350,13 @@ const ClassManagement: React.FC = () => {
         onClose={() => setShowAddModal(false)}
         onAddClass={handleAddClass}
         availableTeachers={availableTeachers}
+      />
+
+      {/* Teacher Assignment Modal */}
+      <TeacherAssignmentModal
+        isOpen={showAssignmentModal}
+        onClose={() => setShowAssignmentModal(false)}
+        onAssignTeacher={handleTeacherAssignment}
       />
     </div>
   );
