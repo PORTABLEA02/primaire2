@@ -18,6 +18,7 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react';
+import AddTeacherModal from './AddTeacherModal';
 
 interface Teacher {
   id: string;
@@ -55,10 +56,10 @@ const TeacherManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddTeacherModal, setShowAddTeacherModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'list' | 'absences' | 'performance'>('list');
+  const [teachers, setTeachers] = useState<Teacher[]>([
 
-  const teachers: Teacher[] = [
     {
       id: '1',
       firstName: 'Moussa',
@@ -149,6 +150,18 @@ const TeacherManagement: React.FC = () => {
       specializations: ['Sciences Naturelles', 'Environnement'],
       performanceRating: 4.7
     }
+  ]);
+
+  // Classes disponibles (sans enseignant assigné)
+  const availableClasses = [
+    'Maternelle 2A',
+    'Maternelle 2B', 
+    'CI B',
+    'CP3',
+    'CE1C',
+    'CE2C',
+    'CM1B',
+    'CM2B'
   ];
 
   const absences: Absence[] = [
@@ -209,6 +222,32 @@ const TeacherManagement: React.FC = () => {
     if (rating >= 4.0) return 'text-blue-600';
     if (rating >= 3.5) return 'text-yellow-600';
     return 'text-red-600';
+  };
+
+  const handleAddTeacher = (teacherData: any) => {
+    const newTeacher: Teacher = {
+      id: (teachers.length + 1).toString(),
+      firstName: teacherData.firstName,
+      lastName: teacherData.lastName,
+      email: teacherData.email,
+      phone: teacherData.phone,
+      subjects: teacherData.subjects,
+      assignedClass: teacherData.assignedClass,
+      status: 'Actif',
+      experience: teacherData.experience,
+      qualification: teacherData.qualification,
+      hireDate: teacherData.hireDate,
+      salary: teacherData.salary,
+      address: teacherData.address,
+      emergencyContact: teacherData.emergencyContact,
+      specializations: teacherData.specializations,
+      performanceRating: 4.0 // Note par défaut pour un nouvel enseignant
+    };
+    
+    setTeachers(prev => [...prev, newTeacher]);
+    
+    // Notification de succès (optionnel)
+    console.log('Nouvel enseignant ajouté:', newTeacher);
   };
 
   const renderStars = (rating: number) => {
@@ -372,7 +411,7 @@ const TeacherManagement: React.FC = () => {
           </button>
           
           <button 
-            onClick={() => setShowAddModal(true)}
+            onClick={() => setShowAddTeacherModal(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
           >
             <Plus className="h-4 w-4" />
@@ -750,6 +789,14 @@ const TeacherManagement: React.FC = () => {
           onClose={() => setSelectedTeacher(null)} 
         />
       )}
+
+      {/* Add Teacher Modal */}
+      <AddTeacherModal
+        isOpen={showAddTeacherModal}
+        onClose={() => setShowAddTeacherModal(false)}
+        onAddTeacher={handleAddTeacher}
+        availableClasses={availableClasses}
+      />
     </div>
   );
 };
