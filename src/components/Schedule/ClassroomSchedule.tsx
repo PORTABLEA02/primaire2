@@ -32,7 +32,7 @@ const ClassroomSchedule: React.FC = () => {
   };
 
   const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
-  const timeSlots = ['08:00-09:00', '09:00-10:00', '10:30-11:30', '11:30-12:30', '14:00-15:00', '15:00-16:00'];
+  const timeSlots = ['08:00-10:00', '10:00-12:00', '14:00-16:00', '16:00-18:00'];
 
   const currentRoom = classrooms.find(r => r.id === selectedRoom);
   const schedule = roomSchedules[selectedRoom as keyof typeof roomSchedules] || [];

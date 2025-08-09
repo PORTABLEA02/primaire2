@@ -78,7 +78,7 @@ const TeacherSchedule: React.FC<TeacherScheduleProps> = ({ teacherId }) => {
   const schedule = teacherSchedules[selectedTeacher as keyof typeof teacherSchedules] || [];
 
   const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
-  const timeSlots = ['08:00-09:00', '09:00-10:00', '10:30-11:30', '11:30-12:30', '14:00-15:00', '15:00-16:00'];
+  const timeSlots = ['08:00-10:00', '10:00-12:00', '14:00-16:00', '16:00-18:00'];
 
   const getScheduleForSlot = (day: string, timeSlot: string) => {
     return schedule.find(item => item.day === day && item.time === timeSlot);

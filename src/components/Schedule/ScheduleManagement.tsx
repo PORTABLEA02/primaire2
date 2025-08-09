@@ -64,13 +64,10 @@ const ScheduleManagement: React.FC = () => {
 
   const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
   const timeSlotHours = [
-    '08:00-09:00',
-    '09:00-10:00',
-    '10:30-11:30',
-    '11:30-12:30',
-    '14:00-15:00',
-    '15:00-16:00',
-    '16:00-17:00'
+    '08:00-10:00',
+    '10:00-12:00',
+    '14:00-16:00',
+    '16:00-18:00'
   ];
 
   const classes = ['Maternelle 1A', 'Maternelle 1B', 'CI A', 'CP1', 'CP2', 'CE1A', 'CE2B', 'CM2A'];
