@@ -1,9 +1,12 @@
 import React from 'react';
 import { Plus, Users, Calendar, Settings } from 'lucide-react';
+import AddClassModal from './AddClassModal';
 
 const ClassManagement: React.FC = () => {
-  const classes = [
+  const [showAddModal, setShowAddModal] = React.useState(false);
+  const [classes, setClasses] = React.useState([
     { 
+      id: '1',
       name: 'Maternelle 1A', 
       level: 'Maternelle', 
       students: 25, 
@@ -13,6 +16,7 @@ const ClassManagement: React.FC = () => {
       subjects: ['Éveil', 'Langage', 'Graphisme', 'Jeux éducatifs']
     },
     { 
+      id: '2',
       name: 'Maternelle 1B', 
       level: 'Maternelle', 
       students: 28, 
@@ -22,6 +26,7 @@ const ClassManagement: React.FC = () => {
       subjects: ['Éveil', 'Langage', 'Graphisme', 'Jeux éducatifs']
     },
     { 
+      id: '3',
       name: 'CI A', 
       level: 'CI', 
       students: 32, 
@@ -31,6 +36,7 @@ const ClassManagement: React.FC = () => {
       subjects: ['Français', 'Mathématiques', 'Éveil Scientifique', 'Éducation Civique']
     },
     { 
+      id: '4',
       name: 'CP1', 
       level: 'CP', 
       students: 30, 
@@ -40,6 +46,7 @@ const ClassManagement: React.FC = () => {
       subjects: ['Français', 'Mathématiques', 'Éveil Scientifique', 'Éducation Civique', 'Dessin']
     },
     { 
+      id: '5',
       name: 'CP2', 
       level: 'CP', 
       students: 29, 
@@ -49,6 +56,7 @@ const ClassManagement: React.FC = () => {
       subjects: ['Français', 'Mathématiques', 'Éveil Scientifique', 'Éducation Civique', 'Dessin']
     },
     { 
+      id: '6',
       name: 'CE1A', 
       level: 'CE1', 
       students: 35, 
@@ -58,6 +66,7 @@ const ClassManagement: React.FC = () => {
       subjects: ['Français', 'Mathématiques', 'Histoire-Géographie', 'Sciences', 'Éducation Civique']
     },
     { 
+      id: '7',
       name: 'CE2B', 
       level: 'CE2', 
       students: 38, 
@@ -67,6 +76,7 @@ const ClassManagement: React.FC = () => {
       subjects: ['Français', 'Mathématiques', 'Histoire-Géographie', 'Sciences', 'Éducation Civique']
     },
     { 
+      id: '8',
       name: 'CM2A', 
       level: 'CM2', 
       students: 42, 
@@ -75,8 +85,17 @@ const ClassManagement: React.FC = () => {
       teacherId: 'ouattara',
       subjects: ['Français', 'Mathématiques', 'Histoire-Géographie', 'Sciences', 'Éducation Civique', 'Anglais']
     }
-  ];
+  ]);
 
+  // Liste des enseignants disponibles (ceux qui n'ont pas encore de classe assignée)
+  const availableTeachers = [
+    { id: 'new-teacher-1', name: 'M. Bakary Diarra', isAvailable: true },
+    { id: 'new-teacher-2', name: 'Mme Salimata Keita', isAvailable: true },
+    { id: 'new-teacher-3', name: 'M. Abdoulaye Cisse', isAvailable: true },
+    { id: 'kone', name: 'Mme Kone', isAvailable: false },
+    { id: 'traore', name: 'M. Traore', isAvailable: false },
+    { id: 'coulibaly', name: 'Mlle Coulibaly', isAvailable: false }
+  ];
   const levels = [
     { name: 'Maternelle', classes: 4, students: 106, color: 'purple' },
     { name: 'CI', classes: 2, students: 64, color: 'blue' },
@@ -100,6 +119,24 @@ const ClassManagement: React.FC = () => {
     return colorMap[color as keyof typeof colorMap] || colorMap.blue;
   };
 
+  const handleAddClass = (classData: any) => {
+    const newClass = {
+      id: (classes.length + 1).toString(),
+      name: classData.name,
+      level: classData.level,
+      students: 0, // Nouvelle classe commence avec 0 élèves
+      capacity: classData.capacity,
+      teacher: classData.teacherName,
+      teacherId: classData.teacherId,
+      subjects: classData.subjects,
+      classroom: classData.classroom
+    };
+    
+    setClasses(prev => [...prev, newClass]);
+    
+    // Afficher une notification de succès (optionnel)
+    console.log('Nouvelle classe créée:', newClass);
+  };
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -115,7 +152,10 @@ const ClassManagement: React.FC = () => {
             <span>Emplois du Temps</span>
           </button>
           
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+          >
             <Plus className="h-4 w-4" />
             <span>Nouvelle Classe</span>
           </button>
@@ -284,6 +324,14 @@ const ClassManagement: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Add Class Modal */}
+      <AddClassModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAddClass={handleAddClass}
+        availableTeachers={availableTeachers}
+      />
     </div>
   );
 };
