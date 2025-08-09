@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, Users, BookOpen, Plus, Filter, Download, Edit, Trash2 } from 'lucide-react';
+import AddCourseModal from './AddCourseModal';
 
 interface TimeSlot {
   id: string;
@@ -16,8 +17,9 @@ const ScheduleManagement: React.FC = () => {
   const [selectedClass, setSelectedClass] = useState('CM2A');
   const [selectedWeek, setSelectedWeek] = useState('current');
   const [viewMode, setViewMode] = useState<'week' | 'class' | 'teacher'>('week');
+  const [showAddCourseModal, setShowAddCourseModal] = useState(false);
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([
 
-  const timeSlots: TimeSlot[] = [
     {
       id: '1',
       startTime: '08:00',
@@ -58,7 +60,7 @@ const ScheduleManagement: React.FC = () => {
       class: 'CI A',
       day: 'Mardi'
     }
-  ];
+  ]);
 
   const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
   const timeSlotHours = [
@@ -78,6 +80,24 @@ const ScheduleManagement: React.FC = () => {
     { name: 'M. Sidibe', class: 'CE2B' },
     { name: 'Mlle Coulibaly', class: 'Disponible' }
   ];
+
+  const handleAddCourse = (courseData: any) => {
+    const newTimeSlot: TimeSlot = {
+      id: (timeSlots.length + 1).toString(),
+      startTime: courseData.startTime,
+      endTime: courseData.endTime,
+      subject: courseData.subject,
+      teacher: `${courseData.teacherName} (Enseignant unique)`,
+      classroom: courseData.classroom,
+      class: courseData.className,
+      day: courseData.day
+    };
+    
+    setTimeSlots(prev => [...prev, newTimeSlot]);
+    
+    // Notification de succès (optionnel)
+    console.log('Nouveau cours ajouté:', newTimeSlot);
+  };
 
   const getScheduleForSlot = (day: string, timeSlot: string) => {
     return timeSlots.find(slot => 
@@ -119,7 +139,8 @@ const ScheduleManagement: React.FC = () => {
             <Download className="h-4 w-4" />
             <span>Exporter</span>
           </button>
-          
+            onClick={() => setShowAddCourseModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
             <Plus className="h-4 w-4" />
             <span>Nouveau Cours</span>
@@ -430,6 +451,13 @@ const ScheduleManagement: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Add Course Modal */}
+      <AddCourseModal
+        isOpen={showAddCourseModal}
+        onClose={() => setShowAddCourseModal(false)}
+        onAddCourse={handleAddCourse}
+      />
     </div>
   );
 };
