@@ -17,6 +17,7 @@ interface SidebarProps {
   onModuleChange: (module: string) => void;
   collapsed: boolean;
   onToggleCollapse: () => void;
+  isMobile: boolean;
 }
 
 const menuItems = [
@@ -34,20 +35,27 @@ const Sidebar: React.FC<SidebarProps> = ({
   activeModule,
   onModuleChange,
   collapsed,
-  onToggleCollapse
+  onToggleCollapse,
+  isMobile
 }) => {
   return (
     <div className={`fixed left-0 top-0 h-full bg-white shadow-lg transition-all duration-300 z-30 ${
-      collapsed ? 'w-16' : 'w-64'
+      isMobile 
+        ? collapsed 
+          ? '-translate-x-full w-64' 
+          : 'translate-x-0 w-64'
+        : collapsed 
+          ? 'w-16' 
+          : 'w-64'
     }`}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        {!collapsed && (
+        {(!collapsed || isMobile) && (
           <div className="flex items-center space-x-2">
             <div className="p-2 bg-blue-600 rounded-lg">
               <School className="h-6 w-6 text-white" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h1 className="text-lg font-bold text-gray-800">EcoleTech</h1>
               <p className="text-xs text-gray-500">Gestion Scolaire</p>
             </div>
@@ -56,11 +64,11 @@ const Sidebar: React.FC<SidebarProps> = ({
         
         <button
           onClick={onToggleCollapse}
-          className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+          className="p-1 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
         >
           <ChevronLeft 
             className={`h-5 w-5 text-gray-600 transition-transform ${
-              collapsed ? 'rotate-180' : ''
+              (collapsed && !isMobile) ? 'rotate-180' : ''
             }`} 
           />
         </button>
@@ -83,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <Icon className={`h-5 w-5 ${collapsed ? 'mx-auto' : 'mr-3'} ${
                 isActive ? 'text-blue-600' : 'text-gray-500'
               }`} />
-              {!collapsed && (
+              {(!collapsed || isMobile) && (
                 <span className={`font-medium ${isActive ? 'text-blue-600' : ''}`}>
                   {item.label}
                 </span>

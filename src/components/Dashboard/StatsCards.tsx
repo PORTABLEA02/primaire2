@@ -38,7 +38,7 @@ const statsData = [
 
 const StatsCards: React.FC = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       {statsData.map((stat, index) => {
         const Icon = stat.icon;
         const colorClasses = {
@@ -49,15 +49,15 @@ const StatsCards: React.FC = () => {
         };
 
         return (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <div key={index} className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
-                <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-800 break-words">{stat.value}</p>
               </div>
               
-              <div className={`p-3 rounded-xl ${colorClasses[stat.color].split(' ')[2]}`}>
-                <Icon className={`h-6 w-6 ${colorClasses[stat.color].split(' ')[1]}`} />
+              <div className={`p-2 sm:p-3 rounded-xl flex-shrink-0 ${colorClasses[stat.color].split(' ')[2]}`}>
+                <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${colorClasses[stat.color].split(' ')[1]}`} />
               </div>
             </div>
             
@@ -67,7 +67,7 @@ const StatsCards: React.FC = () => {
               }`}>
                 {stat.change}
               </span>
-              <span className="text-sm text-gray-500 ml-2">par rapport au mois dernier</span>
+              <span className="text-xs sm:text-sm text-gray-500 ml-2">par rapport au mois dernier</span>
             </div>
           </div>
         );

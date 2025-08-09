@@ -40,8 +40,8 @@ const QuickActions: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Actions Rapides</h2>
+    <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
+      <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">Actions Rapides</h2>
       
       <div className="space-y-3">
         {quickActions.map((action, index) => {
@@ -50,13 +50,13 @@ const QuickActions: React.FC = () => {
           return (
             <button
               key={index}
-              className={`w-full p-4 rounded-lg transition-colors text-left ${getColorClasses(action.color)}`}
+              className={`w-full p-3 sm:p-4 rounded-lg transition-colors text-left ${getColorClasses(action.color)}`}
             >
-              <div className="flex items-center space-x-3">
-                <Icon className="h-5 w-5" />
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <Icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium">{action.title}</p>
-                  <p className="text-sm opacity-75">{action.description}</p>
+                  <p className="text-sm sm:text-base font-medium">{action.title}</p>
+                  <p className="text-xs sm:text-sm opacity-75">{action.description}</p>
                 </div>
               </div>
             </button>
@@ -65,7 +65,7 @@ const QuickActions: React.FC = () => {
       </div>
 
       <div className="mt-6 pt-6 border-t border-gray-100">
-        <button className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+        <button className="w-full py-2 sm:py-3 px-4 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-medium hover:bg-blue-700 transition-colors">
           Voir toutes les actions
         </button>
       </div>

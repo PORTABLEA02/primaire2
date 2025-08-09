@@ -56,10 +56,10 @@ const RecentActivities: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+    <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">Activités Récentes</h2>
-        <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-800">Activités Récentes</h2>
+        <button className="text-blue-600 hover:text-blue-700 text-xs sm:text-sm font-medium">
           Voir tout
         </button>
       </div>
@@ -69,17 +69,17 @@ const RecentActivities: React.FC = () => {
           const Icon = activity.icon;
           
           return (
-            <div key={index} className="flex items-start space-x-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-              <div className={`p-2 rounded-lg ${getColorClasses(activity.color)}`}>
-                <Icon className="h-4 w-4" />
+            <div key={index} className="flex items-start space-x-3 sm:space-x-4 p-2 sm:p-3 hover:bg-gray-50 rounded-lg transition-colors">
+              <div className={`p-1.5 sm:p-2 rounded-lg flex-shrink-0 ${getColorClasses(activity.color)}`}>
+                <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
               </div>
               
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-800 text-sm">{activity.title}</p>
-                <p className="text-gray-600 text-sm mt-1 line-clamp-2">{activity.description}</p>
+                <p className="font-medium text-gray-800 text-xs sm:text-sm">{activity.title}</p>
+                <p className="text-gray-600 text-xs sm:text-sm mt-1 line-clamp-2">{activity.description}</p>
                 
-                <div className="flex items-center mt-2 text-xs text-gray-500">
-                  <Clock className="h-3 w-3 mr-1" />
+                <div className="flex items-center mt-1 sm:mt-2 text-xs text-gray-500">
+                  <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                   {activity.time}
                 </div>
               </div>

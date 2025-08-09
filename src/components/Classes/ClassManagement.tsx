@@ -142,19 +142,19 @@ const ClassManagement: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Gestion des Classes</h1>
-          <p className="text-gray-600">Organisation des niveaux, classes et emplois du temps</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Gestion des Classes</h1>
+          <p className="text-sm sm:text-base text-gray-600">Organisation des niveaux, classes et emplois du temps</p>
         </div>
         
-        <div className="flex items-center space-x-3">
-          <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2 text-sm sm:text-base">
             <Calendar className="h-4 w-4" />
             <span>Emplois du Temps</span>
           </button>
           
           <button 
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 text-sm sm:text-base"
           >
             <Plus className="h-4 w-4" />
             <span>Nouvelle Classe</span>
@@ -163,22 +163,22 @@ const ClassManagement: React.FC = () => {
       </div>
 
       {/* Levels Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3 sm:gap-4">
         {levels.map((level, index) => (
-          <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div key={index} className="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-3">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getColorClasses(level.color)}`}>
+              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${getColorClasses(level.color)}`}>
                 {level.name}
               </span>
-              <Settings className="h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600" />
+              <Settings className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 cursor-pointer hover:text-gray-600" />
             </div>
             
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-gray-600">Classes</span>
                 <span className="font-medium text-gray-800">{level.classes}</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-gray-600">Élèves</span>
                 <span className="font-medium text-gray-800">{level.students}</span>
               </div>
@@ -189,25 +189,25 @@ const ClassManagement: React.FC = () => {
 
       {/* Classes Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100">
+        <div className="p-4 sm:p-6 border-b border-gray-100">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">Liste des Classes</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-800">Liste des Classes</h2>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500">Total: {classes.length} classes</span>
+              <span className="text-xs sm:text-sm text-gray-500">Total: {classes.length} classes</span>
             </div>
           </div>
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Classe</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Niveau</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Enseignant Titulaire</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Effectif</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Taux de Remplissage</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Classe</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Niveau</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Enseignant Titulaire</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Effectif</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Taux de Remplissage</th>
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -216,15 +216,15 @@ const ClassManagement: React.FC = () => {
                 
                 return (
                   <tr key={index} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-3">
+                    <td className="px-3 sm:px-6 py-4">
+                      <div className="flex items-center space-x-2 sm:space-x-3">
                         <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <span className="text-blue-600 font-medium text-sm">
+                          <span className="text-blue-600 font-medium text-xs sm:text-sm">
                             {classItem.name.substring(0, 2)}
                           </span>
                         </div>
                         <div>
-                          <p className="font-medium text-gray-800">{classItem.name}</p>
+                          <p className="text-sm sm:text-base font-medium text-gray-800">{classItem.name}</p>
                           <p className="text-xs text-gray-500">
                             {classItem.subjects.length} matières
                           </p>
@@ -232,29 +232,29 @@ const ClassManagement: React.FC = () => {
                       </div>
                     </td>
                     
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-4">
                       <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
                         {classItem.level}
                       </span>
                     </td>
                     
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-4">
                       <div>
-                        <p className="font-medium text-gray-800">{classItem.teacher}</p>
+                        <p className="text-sm sm:text-base font-medium text-gray-800">{classItem.teacher}</p>
                         <p className="text-xs text-gray-500">Enseignant unique</p>
                       </div>
                     </td>
                     
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-4">
                       <div className="flex items-center space-x-2">
-                        <Users className="h-4 w-4 text-gray-400" />
-                        <span className="text-gray-800">
+                        <Users className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
+                        <span className="text-sm sm:text-base text-gray-800">
                           {classItem.students}/{classItem.capacity}
                         </span>
                       </div>
                     </td>
                     
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-4 hidden lg:table-cell">
                       <div className="flex items-center space-x-3">
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
                           <div 
@@ -271,20 +271,20 @@ const ClassManagement: React.FC = () => {
                       </div>
                     </td>
                     
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <td className="px-3 sm:px-6 py-4">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                        <button className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium">
                           Gérer Classe
                         </button>
-                        <span className="text-gray-300">|</span>
+                        <span className="text-gray-300 hidden sm:inline">|</span>
                         <button 
                           onClick={() => window.location.hash = '#schedule'}
-                          className="text-green-600 hover:text-green-800 text-sm font-medium"
+                          className="text-green-600 hover:text-green-800 text-xs sm:text-sm font-medium"
                         >
                           Planning
                         </button>
-                        <span className="text-gray-300">|</span>
-                        <button className="text-purple-600 hover:text-purple-800 text-sm font-medium">
+                        <span className="text-gray-300 hidden sm:inline">|</span>
+                        <button className="text-purple-600 hover:text-purple-800 text-xs sm:text-sm font-medium">
                           Changer Enseignant
                         </button>
                       </div>
@@ -301,26 +301,26 @@ const ClassManagement: React.FC = () => {
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">Affectation des Enseignants</h3>
-            <p className="text-gray-600">Système d'enseignant unique - Un enseignant par classe pour toutes les matières</p>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800">Affectation des Enseignants</h3>
+            <p className="text-sm sm:text-base text-gray-600">Système d'enseignant unique - Un enseignant par classe pour toutes les matières</p>
           </div>
-          <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+          <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base whitespace-nowrap">
             Gérer les Affectations
           </button>
         </div>
         
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-4 border border-gray-100 rounded-lg">
-            <p className="text-sm text-gray-600">Classes sans enseignant</p>
-            <p className="text-2xl font-bold text-red-600">2</p>
+            <p className="text-xs sm:text-sm text-gray-600">Classes sans enseignant</p>
+            <p className="text-xl sm:text-2xl font-bold text-red-600">2</p>
           </div>
           <div className="p-4 border border-gray-100 rounded-lg">
-            <p className="text-sm text-gray-600">Enseignants disponibles</p>
-            <p className="text-2xl font-bold text-green-600">5</p>
+            <p className="text-xs sm:text-sm text-gray-600">Enseignants disponibles</p>
+            <p className="text-xl sm:text-2xl font-bold text-green-600">5</p>
           </div>
           <div className="p-4 border border-gray-100 rounded-lg">
-            <p className="text-sm text-gray-600">Changements ce mois</p>
-            <p className="text-2xl font-bold text-blue-600">1</p>
+            <p className="text-xs sm:text-sm text-gray-600">Changements ce mois</p>
+            <p className="text-xl sm:text-2xl font-bold text-blue-600">1</p>
           </div>
         </div>
       </div>
