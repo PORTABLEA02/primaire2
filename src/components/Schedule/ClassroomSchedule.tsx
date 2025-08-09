@@ -32,7 +32,7 @@ const ClassroomSchedule: React.FC = () => {
   };
 
   const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
-  const timeSlots = ['08:00-10:00', '10:00-12:00', '14:00-16:00', '16:00-18:00'];
+  const timeSlots = ['08:00-10:00', '10:00-12:00', '12:00-14:00', '14:00-16:00', '16:00-18:00'];
 
   const currentRoom = classrooms.find(r => r.id === selectedRoom);
   const schedule = roomSchedules[selectedRoom as keyof typeof roomSchedules] || [];
@@ -199,7 +199,11 @@ const ClassroomSchedule: React.FC = () => {
                     
                     return (
                       <td key={day} className="px-2 py-2 text-center">
-                        {scheduleItem ? (
+                        {timeSlot === '12:00-14:00' ? (
+                          <div className="h-20 flex items-center justify-center bg-yellow-50 border-2 border-yellow-200 rounded-lg">
+                            <span className="text-yellow-700 font-medium">Pause</span>
+                          </div>
+                        ) : scheduleItem ? (
                           <div className={`p-3 rounded-lg border-2 ${getSubjectColor(scheduleItem.subject)}`}>
                             <div className="font-medium text-sm mb-1">{scheduleItem.subject}</div>
                             <div className="text-xs opacity-75 mb-1">{scheduleItem.class}</div>
