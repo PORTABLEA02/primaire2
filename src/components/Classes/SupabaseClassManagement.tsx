@@ -60,7 +60,7 @@ const SupabaseClassManagement: React.FC = () => {
       setLoading(true);
       const [classesData, levelsData, teachersData, statsData] = await Promise.all([
         classService.getClasses(),
-        levelService.getLevels(),
+        levelService?.getLevels() || Promise.resolve([]),
         teacherService.getTeachers(),
         classService.getClassStats()
       ]);
@@ -560,5 +560,3 @@ const SupabaseClassManagement: React.FC = () => {
 };
 
 export default SupabaseClassManagement;
-
-export default SupabaseClassManagement
