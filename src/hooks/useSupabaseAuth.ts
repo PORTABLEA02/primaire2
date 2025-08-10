@@ -18,19 +18,21 @@ export const useSupabaseAuth = () => {
     loading: true
   });
 
+  // Separate state to trigger profile loading
+  const [shouldLoadProfile, setShouldLoadProfile] = useState<string | null>(null);
   useEffect(() => {
     // Récupérer la session initiale
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
-        const profile = await getUserProfile(session.user.id);
         setAuthState({
           user: session.user,
-          profile,
+          profile: null,
           session,
           loading: false
         });
+        setShouldLoadProfile(session.user.id);
       } else {
         setAuthState(prev => ({ ...prev, loading: false }));
       }
@@ -40,15 +42,16 @@ export const useSupabaseAuth = () => {
 
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (session?.user) {
-          const profile = await getUserProfile(session.user.id);
           setAuthState({
             user: session.user,
-            profile,
+            profile: null,
             session,
             loading: false
           });
+          // Trigger profile loading outside the callback
+          setShouldLoadProfile(session.user.id);
         } else {
           setAuthState({
             user: null,
@@ -56,6 +59,7 @@ export const useSupabaseAuth = () => {
             session: null,
             loading: false
           });
+          setShouldLoadProfile(null);
         }
       }
     );
@@ -63,6 +67,21 @@ export const useSupabaseAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Load profile when shouldLoadProfile changes (outside onAuthStateChange callback)
+  useEffect(() => {
+    if (shouldLoadProfile) {
+      const loadProfile = async () => {
+        try {
+          const profile = await getUserProfile(shouldLoadProfile);
+          setAuthState(prev => ({ ...prev, profile }));
+        } catch (error) {
+          console.error('Error loading profile:', error);
+        }
+      };
+      
+      loadProfile();
+    }
+  }, [shouldLoadProfile]);
   const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
       const { data, error } = await supabase

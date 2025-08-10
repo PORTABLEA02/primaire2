@@ -31,31 +31,8 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
   selectedSubject,
   selectedPeriod
 }) => {
-  // Données d'exemple des élèves selon la classe
-  const getStudentsForClass = (className: string): Student[] => {
-    const baseStudents = {
-      'CM2A': [
-        { id: '1', firstName: 'Kofi', lastName: 'Mensah', currentGrade: null, previousGrade: 14.5, attendance: 95 },
-        { id: '2', firstName: 'Aminata', lastName: 'Traore', currentGrade: null, previousGrade: 16.0, attendance: 98 },
-        { id: '3', firstName: 'Ibrahim', lastName: 'Kone', currentGrade: null, previousGrade: 12.5, attendance: 92 },
-        { id: '4', firstName: 'Fatoumata', lastName: 'Diallo', currentGrade: null, previousGrade: 15.5, attendance: 96 },
-        { id: '5', firstName: 'Sekou', lastName: 'Sangare', currentGrade: null, previousGrade: 11.0, attendance: 88 }
-      ],
-      'CE2B': [
-        { id: '6', firstName: 'Aissata', lastName: 'Ba', currentGrade: null, previousGrade: 13.5, attendance: 94 },
-        { id: '7', firstName: 'Moussa', lastName: 'Coulibaly', currentGrade: null, previousGrade: 12.0, attendance: 90 },
-        { id: '8', firstName: 'Mariam', lastName: 'Sidibe', currentGrade: null, previousGrade: 15.0, attendance: 97 }
-      ],
-      'CM1A': [
-        { id: '9', firstName: 'Ousmane', lastName: 'Keita', currentGrade: null, previousGrade: 14.0, attendance: 93 },
-        { id: '10', firstName: 'Kadiatou', lastName: 'Toure', currentGrade: null, previousGrade: 16.5, attendance: 99 }
-      ]
-    };
-    
-    return baseStudents[className as keyof typeof baseStudents] || [];
-  };
-
   const [students, setStudents] = useState<Student[]>(getStudentsForClass(selectedClass));
+  const [loading, setLoading] = useState(false);
   const [grades, setGrades] = useState<Record<string, GradeEntry>>({});
   const [evaluationType, setEvaluationType] = useState<'devoir' | 'composition' | 'interrogation'>('devoir');
   const [evaluationTitle, setEvaluationTitle] = useState('');
@@ -64,8 +41,15 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
 
   React.useEffect(() => {
-    if (selectedClass) {
-      const classStudents = getStudentsForClass(selectedClass);
+    if (selectedClass && isOpen) {
+      loadClassStudents();
+    }
+  }, [selectedClass, isOpen]);
+
+  const loadClassStudents = async () => {
+    try {
+      setLoading(true);
+      const classStudents = await gradeService.getStudentsForGradeEntry(selectedClass);
       setStudents(classStudents);
       
       // Initialiser les notes vides
@@ -78,8 +62,12 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
         };
       });
       setGrades(initialGrades);
+    } catch (error) {
+      console.error('Erreur lors du chargement des élèves:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [selectedClass]);
+  };
 
   const updateGrade = (studentId: string, grade: number | null) => {
     setGrades(prev => ({
@@ -363,6 +351,22 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center">
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                          <span className="text-gray-500">Chargement des élèves...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : students.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center">
+                        <p className="text-gray-500">Aucun élève trouvé pour cette classe</p>
+                      </td>
+                    </tr>
+                  ) : (
                   {students.map((student, index) => {
                     const currentGrade = grades[student.id]?.grade;
                     const gradeStatus = getGradeStatus(currentGrade);
@@ -449,6 +453,7 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
                       </tr>
                     );
                   })}
+                  )}
                 </tbody>
               </table>
             </div>

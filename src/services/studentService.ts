@@ -195,6 +195,33 @@ export const studentService = {
     return data;
   },
 
+  // Récupérer les classes disponibles pour l'inscription
+  async getClasses() {
+    const { data, error } = await supabase
+      .from('classes')
+      .select(`
+        id,
+        name,
+        capacity,
+        levels (
+          id,
+          name,
+          annual_fees
+        ),
+        students (id)
+      `)
+      .eq('status', 'Actif')
+      .order('name', { ascending: true });
+
+    if (error) throw error;
+    
+    return data?.map(cls => ({
+      ...cls,
+      student_count: cls.students?.length || 0,
+      available_spots: cls.capacity - (cls.students?.length || 0)
+    }));
+  },
+
   // Statistiques des élèves
   async getStudentStats() {
     const { data: totalStudents, error: totalError } = await supabase

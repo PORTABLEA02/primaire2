@@ -82,6 +82,14 @@ const SupabaseDashboard: React.FC = () => {
     }
   ];
 
+  const adaptedActivities = activities.map(activity => ({
+    id: activity.id,
+    type: activity.type,
+    title: activity.title,
+    description: activity.description,
+    time: activity.time,
+    user: activity.user
+  }));
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -113,7 +121,7 @@ const SupabaseDashboard: React.FC = () => {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">
           <AcademicOverview academicData={academicData} />
-          <RecentActivities activities={activities} />
+          <RecentActivities activities={adaptedActivities} />
         </div>
         
         <div>

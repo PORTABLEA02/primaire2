@@ -109,6 +109,44 @@ export const paymentService = {
     if (error) throw error;
   },
 
+  // Récupérer les élèves pour les paiements
+  async getStudentsForPayment() {
+    const { data, error } = await supabase
+      .from('students')
+      .select(`
+        id,
+        first_name,
+        last_name,
+        outstanding_amount,
+        total_fees,
+        paid_amount,
+        father_phone,
+        mother_phone,
+        classes (
+          name,
+          levels (name)
+        ),
+        payments (
+          payment_date,
+          amount
+        )
+      `)
+      .eq('status', 'Actif')
+      .order('last_name', { ascending: true });
+
+    if (error) throw error;
+
+    return data?.map(student => ({
+      id: student.id,
+      name: `${student.first_name} ${student.last_name}`,
+      class: student.classes?.name || 'Non assigné',
+      level: student.classes?.levels?.name || '',
+      outstandingAmount: student.outstanding_amount || 0,
+      lastPayment: student.payments?.[0]?.payment_date,
+      parentPhone: student.father_phone || student.mother_phone
+    }));
+  },
+
   // Statistiques financières
   async getFinancialStats(period?: 'month' | 'trimester' | 'year') {
     let dateFilter = '';

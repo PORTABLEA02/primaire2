@@ -42,6 +42,9 @@ const AcademicOverview: React.FC<AcademicOverviewProps> = ({ academicData }) => 
       percentage: -2.1
     }
   ];
+  
+  const data = academicData || defaultAcademicData;
+
   return (
     <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
       <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-4 sm:mb-6">Répartition Académique</h2>
@@ -90,7 +93,5 @@ const AcademicOverview: React.FC<AcademicOverviewProps> = ({ academicData }) => 
     </div>
   );
 };
-
-  const data = academicData || defaultAcademicData;
 
 export default AcademicOverview;
