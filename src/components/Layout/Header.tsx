@@ -1,7 +1,7 @@
 import React from 'react';
 import { Menu, Bell, User, Search } from 'lucide-react';
 import UserMenu from './UserMenu';
-import { useAuth } from '../Auth/AuthProvider';
+import { useAuth } from '../Auth/SupabaseAuthProvider';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
