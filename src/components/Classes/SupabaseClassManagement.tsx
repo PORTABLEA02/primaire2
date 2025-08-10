@@ -553,7 +553,6 @@ const SupabaseClassManagement: React.FC = () => {
             availableTeachers={availableTeachers.filter(t => t.isAvailable)}
           />
         </>
-        levels={levels}
       )}
     </div>
   );
