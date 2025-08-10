@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { AuthProvider, useAuth } from './components/Auth/AuthProvider';
-import LoginPage from './components/Auth/LoginPage';
+import { School } from 'lucide-react';
+import { SupabaseAuthProvider, useAuth } from './components/Auth/SupabaseAuthProvider';
+import SupabaseLoginPage from './components/Auth/SupabaseLoginPage';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
-import Dashboard from './components/Dashboard/Dashboard';
-import StudentManagement from './components/Students/StudentManagement';
+import SupabaseDashboard from './components/Dashboard/SupabaseDashboard';
+import SupabaseStudentManagement from './components/Students/SupabaseStudentManagement';
 import ClassManagement from './components/Classes/ClassManagement';
 import FinanceManagement from './components/Finance/FinanceManagement';
 import AcademicManagement from './components/Academic/AcademicManagement';
@@ -14,7 +15,7 @@ import Settings from './components/Settings/Settings';
 import ScheduleManagement from './components/Schedule/ScheduleManagement';
 
 const AppContent: React.FC = () => {
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const [activeModule, setActiveModule] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -32,17 +33,21 @@ const AppContent: React.FC = () => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  const handleLogin = async (credentials: { email: string; password: string; rememberMe: boolean }) => {
-    const success = await login(credentials.email, credentials.password, credentials.rememberMe);
-    if (!success) {
-      // L'erreur sera gérée par le composant LoginPage
-      return false;
-    }
-    return true;
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <School className="h-8 w-8 text-blue-600 animate-pulse" />
+          </div>
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />;
+    return <SupabaseLoginPage />;
   }
 
   const renderActiveModule = () => {
@@ -50,13 +55,13 @@ const AppContent: React.FC = () => {
       case 'dashboard':
         return (
           <ProtectedRoute>
-            <Dashboard />
+            <SupabaseDashboard />
           </ProtectedRoute>
         );
       case 'students':
         return (
           <ProtectedRoute requiredPermission="students">
-            <StudentManagement />
+            <SupabaseStudentManagement />
           </ProtectedRoute>
         );
       case 'classes':
@@ -140,9 +145,9 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <AuthProvider>
+    <SupabaseAuthProvider>
       <AppContent />
-    </AuthProvider>
+    </SupabaseAuthProvider>
   );
 }
 

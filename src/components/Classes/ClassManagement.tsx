@@ -324,28 +324,30 @@ const ClassManagement: React.FC = () => {
                       </div>
                     </td>
                     
-                    <td className="px-3 sm:px-6 py-4">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
-                        <button className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium">
-                          Gérer Classe
-                        </button>
-                        <span className="text-gray-300 hidden sm:inline">|</span>
-                        <button 
-                          onClick={() => handleManageClass(classItem)}
-                          onClick={() => handleViewSchedule(classItem)}
-                          className="text-green-600 hover:text-green-800 text-xs sm:text-sm font-medium"
-                        >
-                          Planning
-                        </button>
-                        <span className="text-gray-300 hidden sm:inline">|</span>
-                        <button 
-                          onClick={() => handleChangeTeacher(classItem)}
-                          className="text-purple-600 hover:text-purple-800 text-xs sm:text-sm font-medium"
-                        >
-                          Changer Enseignant
-                        </button>
-                      </div>
-                    </td>
+                 <td className="px-3 sm:px-6 py-4">
+  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+    <button 
+      onClick={() => handleManageClass(classItem)}
+      className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium"
+    >
+      Gérer Classe
+    </button>
+    <span className="text-gray-300 hidden sm:inline">|</span>
+    <button 
+      onClick={() => handleViewSchedule(classItem)}
+      className="text-green-600 hover:text-green-800 text-xs sm:text-sm font-medium"
+    >
+      Planning
+    </button>
+    <span className="text-gray-300 hidden sm:inline">|</span>
+    <button 
+      onClick={() => handleChangeTeacher(classItem)}
+      className="text-purple-600 hover:text-purple-800 text-xs sm:text-sm font-medium"
+    >
+      Changer Enseignant
+    </button>
+  </div>
+</td>
                   </tr>
                 );
               })}

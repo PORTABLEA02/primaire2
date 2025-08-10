@@ -1,46 +1,69 @@
 import React from 'react';
 import { Users, GraduationCap, DollarSign, AlertTriangle } from 'lucide-react';
 
-const statsData = [
-  {
-    title: 'Élèves Inscrits',
-    value: '1,247',
-    change: '+12%',
-    changeType: 'increase',
-    icon: Users,
-    color: 'blue'
-  },
-  {
-    title: 'Classes Actives',
-    value: '42',
-    change: '+2',
-    changeType: 'increase',
-    icon: GraduationCap,
-    color: 'green'
-  },
-  {
-    title: 'Revenus cette Tranche',
-    value: '2,450,000 FCFA',
-    change: '+8.5%',
-    changeType: 'increase',
-    icon: DollarSign,
-    color: 'yellow'
-  },
-  {
-    title: 'Paiements en Retard',
-    value: '183',
-    change: '-5%',
-    changeType: 'decrease',
-    icon: AlertTriangle,
-    color: 'red'
-  }
-];
+interface StatsCardsProps {
+  statsData?: Array<{
+    title: string;
+    value: string;
+    change: string;
+    changeType: 'increase' | 'decrease';
+    icon: string;
+    color: string;
+  }>;
+}
 
-const StatsCards: React.FC = () => {
+const StatsCards: React.FC<StatsCardsProps> = ({ statsData }) => {
+  const defaultStatsData = [
+    {
+      title: 'Élèves Inscrits',
+      value: '1,247',
+      change: '+12%',
+      changeType: 'increase' as const,
+      icon: 'Users',
+      color: 'blue'
+    },
+    {
+      title: 'Classes Actives',
+      value: '42',
+      change: '+2',
+      changeType: 'increase' as const,
+      icon: 'GraduationCap',
+      color: 'green'
+    },
+    {
+      title: 'Revenus cette Tranche',
+      value: '2,450,000 FCFA',
+      change: '+8.5%',
+      changeType: 'increase' as const,
+      icon: 'DollarSign',
+      color: 'yellow'
+    },
+    {
+      title: 'Paiements en Retard',
+      value: '183',
+      change: '-5%',
+      changeType: 'decrease' as const,
+      icon: 'AlertTriangle',
+      color: 'red'
+    }
+  ];
+
+  const data = statsData || defaultStatsData;
+
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'Users': return Users;
+      case 'GraduationCap': return GraduationCap;
+      case 'DollarSign': return DollarSign;
+      case 'AlertTriangle': return AlertTriangle;
+      default: return Users;
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-      {statsData.map((stat, index) => {
-        const Icon = stat.icon;
+      {data.map((stat, index) => {
+        const Icon = getIcon(stat.icon);
         const colorClasses = {
           blue: 'bg-blue-500 text-blue-600 bg-blue-50',
           green: 'bg-green-500 text-green-600 bg-green-50',
