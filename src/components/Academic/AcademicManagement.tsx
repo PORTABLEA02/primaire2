@@ -65,8 +65,8 @@ const AcademicManagement: React.FC = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2 text-sm sm:text-base">
-            onClick={() => setShowCalculateAveragesModal(true)}
+          <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2 text-sm sm:text-base"
+            onClick={() => setShowCalculateAveragesModal(true)}>
             <Calculator className="h-4 w-4" />
             <span>Calculer Moyennes</span>
           </button>
