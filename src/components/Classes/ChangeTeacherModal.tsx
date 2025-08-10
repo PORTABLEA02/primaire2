@@ -4,101 +4,55 @@ import { X, User, Users, ArrowRight, CheckCircle, AlertCircle, Award } from 'luc
 interface ChangeTeacherModalProps {
   isOpen: boolean;
   onClose: () => void;
-  classData: {
+  classData: any;
+  onChangeTeacher: (classId: string, newTeacherId: string, newTeacherName: string) => void;
+  availableTeachers: Array<{
     id: string;
     name: string;
-    level: string;
-    teacher: string;
-    teacherId: string;
-    subjects: string[];
-  };
-  onChangeTeacher: (classId: string, newTeacherId: string, newTeacherName: string) => void;
-}
-
-interface Teacher {
-  id: string;
-  name: string;
-  qualification: string;
-  experience: string;
-  specializations: string[];
-  currentClass: string | null;
-  isAvailable: boolean;
-  performanceRating: number;
+    isAvailable: boolean;
+  }>;
 }
 
 const ChangeTeacherModal: React.FC<ChangeTeacherModalProps> = ({
   isOpen,
   onClose,
   classData,
-  onChangeTeacher
+  onChangeTeacher,
+  availableTeachers
 }) => {
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
   const [confirmationStep, setConfirmationStep] = useState(false);
 
-  const availableTeachers: Teacher[] = [
-    {
-      id: 'coulibaly',
-      name: 'Mlle Fatoumata Coulibaly',
-      qualification: 'Licence en Sciences de l\'Éducation',
-      experience: '3 ans',
-      specializations: ['Pédagogie', 'Psychologie'],
-      currentClass: null,
-      isAvailable: true,
-      performanceRating: 4.0
-    },
-    {
-      id: 'sangare',
-      name: 'M. Sekou Sangare',
-      qualification: 'Maîtrise en Sciences Naturelles',
-      experience: '15 ans',
-      specializations: ['Sciences Naturelles', 'Environnement'],
-      currentClass: null,
-      isAvailable: true,
-      performanceRating: 4.7
-    },
-    {
-      id: 'diarra',
-      name: 'M. Bakary Diarra',
-      qualification: 'Licence en Mathématiques',
-      experience: '6 ans',
-      specializations: ['Mathématiques', 'Physique'],
-      currentClass: null,
-      isAvailable: true,
-      performanceRating: 4.3
-    },
-    {
-      id: 'keita',
-      name: 'Mme Salimata Keita',
-      qualification: 'Licence en Français',
-      experience: '4 ans',
-      specializations: ['Littérature', 'Grammaire'],
-      currentClass: null,
-      isAvailable: true,
-      performanceRating: 4.1
-    }
-  ];
+  // Données d'exemple pour les enseignants disponibles avec plus de détails
+  const enhancedTeachers = availableTeachers.map(teacher => ({
+    ...teacher,
+    qualification: 'Licence en Sciences de l\'Éducation',
+    experience: '5 ans',
+    specializations: ['Pédagogie', 'Psychologie'],
+    performanceRating: 4.2
+  }));
 
-  const getTeacherSuitability = (teacher: Teacher) => {
+  const getTeacherSuitability = (teacher: any) => {
     let score = 0;
     let reasons = [];
 
     // Vérifier les spécialisations
-    if (classData.level === 'Maternelle' && teacher.specializations.includes('Petite Enfance')) {
+    if (classData.level_name === 'Maternelle' && teacher.specializations.includes('Petite Enfance')) {
       score += 3;
       reasons.push('Spécialisé en petite enfance');
     }
 
-    if (teacher.specializations.includes('Mathématiques') && classData.subjects.includes('Mathématiques')) {
+    if (teacher.specializations.includes('Mathématiques')) {
       score += 2;
       reasons.push('Spécialisé en mathématiques');
     }
 
-    if (teacher.specializations.includes('Sciences Naturelles') && classData.subjects.includes('Sciences')) {
+    if (teacher.specializations.includes('Sciences Naturelles')) {
       score += 2;
       reasons.push('Spécialisé en sciences');
     }
 
-    if (teacher.specializations.includes('Littérature') && classData.subjects.includes('Français')) {
+    if (teacher.specializations.includes('Littérature')) {
       score += 2;
       reasons.push('Spécialisé en français');
     }
@@ -174,7 +128,7 @@ const ChangeTeacherModal: React.FC<ChangeTeacherModalProps> = ({
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-800">Changer l'Enseignant</h2>
-                <p className="text-gray-600">{classData.name} • Enseignant actuel: {classData.teacher}</p>
+                <p className="text-gray-600">{classData.name} • Enseignant actuel: {classData.teacher_name || 'Aucun'}</p>
               </div>
             </div>
             <button
@@ -192,15 +146,27 @@ const ChangeTeacherModal: React.FC<ChangeTeacherModalProps> = ({
               {/* Enseignant actuel */}
               <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <h3 className="font-medium text-blue-800 mb-2">Enseignant Actuel</h3>
+                {classData.teacher_name ? (
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                     <User className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="font-medium text-blue-800">{classData.teacher}</p>
+                      <p className="font-medium text-blue-800">{classData.teacher_name}</p>
                     <p className="text-sm text-blue-600">Enseigne toutes les matières de {classData.name}</p>
                   </div>
                 </div>
+                ) : (
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                      <AlertCircle className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-red-800">Aucun enseignant assigné</p>
+                      <p className="text-sm text-red-600">Cette classe a besoin d'un enseignant</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Système d'enseignant unique */}
@@ -210,8 +176,8 @@ const ChangeTeacherModal: React.FC<ChangeTeacherModalProps> = ({
                   <div>
                     <h4 className="font-medium text-yellow-800">Important - Système d'Enseignant Unique</h4>
                     <p className="text-sm text-yellow-700 mt-1">
-                      Le nouvel enseignant sera responsable de toutes les matières de la classe: {classData.subjects.join(', ')}.
-                      Il assurera l'enseignement complet du programme de {classData.level}.
+                      Le nouvel enseignant sera responsable de toutes les matières de la classe.
+                      Il assurera l'enseignement complet du programme de {classData.level_name}.
                     </p>
                   </div>
                 </div>
@@ -222,7 +188,7 @@ const ChangeTeacherModal: React.FC<ChangeTeacherModalProps> = ({
                 <h3 className="text-lg font-semibold text-gray-800">Enseignants Disponibles</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {availableTeachers.map((teacher) => {
+                  {enhancedTeachers.map((teacher) => {
                     const suitability = getTeacherSuitability(teacher);
                     const isSelected = selectedTeacher?.id === teacher.id;
                     

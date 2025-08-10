@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { X, Users, BookOpen, User, MapPin } from 'lucide-react';
+import type { Level } from '../../lib/supabase';
 
 interface AddClassModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddClass: (classData: NewClassData) => void;
   availableTeachers: Teacher[];
+  levels: Level[];
 }
 
 interface Teacher {
@@ -16,7 +18,7 @@ interface Teacher {
 
 interface NewClassData {
   name: string;
-  level: string;
+  levelId: string;
   capacity: number;
   teacherId: string;
   teacherName: string;
@@ -28,11 +30,12 @@ const AddClassModal: React.FC<AddClassModalProps> = ({
   isOpen,
   onClose,
   onAddClass,
-  availableTeachers
+  availableTeachers,
+  levels
 }) => {
   const [formData, setFormData] = useState<NewClassData>({
     name: '',
-    level: '',
+    levelId: '',
     capacity: 30,
     teacherId: '',
     teacherName: '',
@@ -41,16 +44,6 @@ const AddClassModal: React.FC<AddClassModalProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const levels = [
-    'Maternelle',
-    'CI',
-    'CP',
-    'CE1',
-    'CE2',
-    'CM1',
-    'CM2'
-  ];
 
   const subjectsByLevel = {
     'Maternelle': ['Éveil', 'Langage', 'Graphisme', 'Jeux éducatifs', 'Motricité'],
@@ -69,8 +62,8 @@ const AddClassModal: React.FC<AddClassModalProps> = ({
       newErrors.name = 'Le nom de la classe est requis';
     }
 
-    if (!formData.level) {
-      newErrors.level = 'Le niveau est requis';
+    if (!formData.levelId) {
+      newErrors.levelId = 'Le niveau est requis';
     }
 
     if (formData.capacity < 10 || formData.capacity > 50) {
@@ -112,11 +105,14 @@ const AddClassModal: React.FC<AddClassModalProps> = ({
     onClose();
   };
 
-  const handleLevelChange = (level: string) => {
+  const handleLevelChange = (levelId: string) => {
+    const selectedLevel = levels.find(l => l.id === levelId);
+    const levelName = selectedLevel?.name || '';
+    
     setFormData(prev => ({
       ...prev,
-      level,
-      subjects: subjectsByLevel[level as keyof typeof subjectsByLevel] || []
+      levelId,
+      subjects: subjectsByLevel[levelName as keyof typeof subjectsByLevel] || []
     }));
   };
 
@@ -192,18 +188,20 @@ const AddClassModal: React.FC<AddClassModalProps> = ({
                   Niveau *
                 </label>
                 <select
-                  value={formData.level}
+                  value={formData.levelId}
                   onChange={(e) => handleLevelChange(e.target.value)}
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.level ? 'border-red-300' : 'border-gray-200'
+                    errors.levelId ? 'border-red-300' : 'border-gray-200'
                   }`}
                 >
                   <option value="">Sélectionner un niveau</option>
                   {levels.map(level => (
-                    <option key={level} value={level}>{level}</option>
+                    <option key={level.id} value={level.id}>
+                      {level.name} ({level.annual_fees.toLocaleString()} FCFA/an)
+                    </option>
                   ))}
                 </select>
-                {errors.level && <p className="text-red-500 text-sm mt-1">{errors.level}</p>}
+                {errors.levelId && <p className="text-red-500 text-sm mt-1">{errors.levelId}</p>}
               </div>
             </div>
 
@@ -271,7 +269,7 @@ const AddClassModal: React.FC<AddClassModalProps> = ({
           </div>
 
           {/* Subjects */}
-          {formData.level && (
+          {formData.levelId && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center space-x-2">
                 <BookOpen className="h-5 w-5" />
@@ -279,12 +277,16 @@ const AddClassModal: React.FC<AddClassModalProps> = ({
               </h3>
               
               <div className="p-4 bg-gray-50 rounded-lg">
+                {(() => {
+                  const selectedLevel = levels.find(l => l.id === formData.levelId);
+                  return (
+                    <>
                 <p className="text-sm text-gray-600 mb-3">
-                  Matières du programme officiel pour le niveau {formData.level}:
+                        Matières du programme officiel pour le niveau {selectedLevel?.name}:
                 </p>
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {(subjectsByLevel[formData.level as keyof typeof subjectsByLevel] || []).map(subject => (
+                        {(subjectsByLevel[selectedLevel?.name as keyof typeof subjectsByLevel] || []).map(subject => (
                     <label key={subject} className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -296,6 +298,9 @@ const AddClassModal: React.FC<AddClassModalProps> = ({
                     </label>
                   ))}
                 </div>
+                    </>
+                  );
+                })()}
                 
                 {errors.subjects && <p className="text-red-500 text-sm mt-2">{errors.subjects}</p>}
               </div>
@@ -303,16 +308,22 @@ const AddClassModal: React.FC<AddClassModalProps> = ({
           )}
 
           {/* Summary */}
-          {formData.name && formData.level && formData.teacherName && (
+          {formData.name && formData.levelId && formData.teacherName && (
             <div className="p-4 bg-green-50 rounded-lg border border-green-200">
               <h4 className="font-medium text-green-800 mb-2">Résumé de la Classe</h4>
+              {(() => {
+                const selectedLevel = levels.find(l => l.id === formData.levelId);
+                return (
               <div className="text-sm text-green-700 space-y-1">
-                <p><strong>Classe:</strong> {formData.name} ({formData.level})</p>
+                    <p><strong>Classe:</strong> {formData.name} ({selectedLevel?.name})</p>
                 <p><strong>Enseignant:</strong> {formData.teacherName}</p>
                 <p><strong>Capacité:</strong> {formData.capacity} élèves</p>
                 <p><strong>Matières:</strong> {formData.subjects.length} matières sélectionnées</p>
+                    <p><strong>Frais annuels:</strong> {selectedLevel?.annual_fees.toLocaleString()} FCFA</p>
                 {formData.classroom && <p><strong>Salle:</strong> {formData.classroom}</p>}
               </div>
+                );
+              })()}
             </div>
           )}
 

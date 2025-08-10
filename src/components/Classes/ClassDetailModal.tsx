@@ -4,20 +4,8 @@ import { X, Users, BookOpen, User, MapPin, Calendar, Edit, Save, Phone, Mail, Aw
 interface ClassDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  classData: ClassData;
-  onUpdateClass: (updatedClass: ClassData) => void;
-}
-
-interface ClassData {
-  id: string;
-  name: string;
-  level: string;
-  students: number;
-  capacity: number;
-  teacher: string;
-  teacherId: string;
-  subjects: string[];
-  classroom?: string;
+  classData: any;
+  onUpdateClass: (updatedClass: any) => void;
 }
 
 interface Student {
@@ -43,7 +31,7 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(classData);
 
-  // Données d'exemple des élèves de la classe
+  // Données d'exemple des élèves de la classe (à remplacer par des données réelles)
   const [students] = useState<Student[]>([
     {
       id: '1',
@@ -141,8 +129,8 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-800">{classData.name}</h2>
-                <p className="text-gray-600">{classData.level} • {classData.students}/{classData.capacity} élèves</p>
-                <p className="text-sm text-gray-500">Enseignant: {classData.teacher}</p>
+                <p className="text-gray-600">{classData.level_name} • {classData.student_count}/{classData.capacity} élèves</p>
+                <p className="text-sm text-gray-500">Enseignant: {classData.teacher_name || 'Non assigné'}</p>
               </div>
             </div>
             <button
@@ -208,7 +196,7 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-blue-600">Effectif</p>
-                      <p className="text-2xl font-bold text-blue-800">{classData.students}/{classData.capacity}</p>
+                      <p className="text-2xl font-bold text-blue-800">{classData.student_count}/{classData.capacity}</p>
                     </div>
                     <Users className="h-6 w-6 text-blue-600" />
                   </div>
@@ -216,7 +204,7 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
                     <div className="w-full bg-blue-200 rounded-full h-2">
                       <div 
                         className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${(classData.students / classData.capacity) * 100}%` }}
+                        style={{ width: `${(classData.student_count / classData.capacity) * 100}%` }}
                       ></div>
                     </div>
                   </div>
@@ -260,19 +248,19 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Niveau:</span>
-                      <span className="font-medium">{classData.level}</span>
+                      <span className="font-medium">{classData.level_name}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Enseignant titulaire:</span>
-                      <span className="font-medium">{classData.teacher}</span>
+                      <span className="font-medium">{classData.teacher_name || 'Non assigné'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Salle de classe:</span>
-                      <span className="font-medium">Salle 12</span>
+                      <span className="font-medium">{classData.classroom || 'Non définie'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Matières enseignées:</span>
-                      <span className="font-medium">{classData.subjects.length}</span>
+                      <span className="font-medium">Selon le niveau</span>
                     </div>
                   </div>
                 </div>
@@ -303,11 +291,17 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
               {/* Matières enseignées */}
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Matières du Programme</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Matières enseignées selon le programme officiel du niveau {classData.level_name}
+                </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {classData.subjects.map(subject => (
+                  {/* Affichage des matières selon le niveau - à adapter selon vos données */}
+                  {['Français', 'Mathématiques', 'Sciences', 'Histoire-Géographie'].map(subject => (
                     <div key={subject} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                       <p className="font-medium text-blue-800">{subject}</p>
-                      <p className="text-xs text-blue-600">Enseigné par {classData.teacher.split(' ')[1]}</p>
+                      <p className="text-xs text-blue-600">
+                        Enseigné par {classData.teacher_name?.split(' ')[1] || 'N/A'}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -420,7 +414,7 @@ const ClassDetailModal: React.FC<ClassDetailModalProps> = ({
                 <div className="bg-white border border-gray-200 rounded-lg p-6">
                   <h4 className="font-medium text-gray-800 mb-4">Performances par Matière</h4>
                   <div className="space-y-3">
-                    {classData.subjects.map(subject => {
+                    {['Français', 'Mathématiques', 'Sciences', 'Histoire-Géographie'].map(subject => {
                       const randomGrade = 10 + Math.random() * 8; // Simulation
                       return (
                         <div key={subject} className="flex items-center justify-between">

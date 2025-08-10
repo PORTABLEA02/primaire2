@@ -1,31 +1,13 @@
 import React, { useState } from 'react';
 import { X, Users, User, ArrowRight, CheckCircle, AlertCircle, BookOpen, Calendar } from 'lucide-react';
+import type { Class, Teacher } from '../../lib/supabase';
 
 interface TeacherAssignmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAssignTeacher: (assignments: Assignment[]) => void;
-}
-
-interface Teacher {
-  id: string;
-  name: string;
-  qualification: string;
-  experience: string;
-  specializations: string[];
-  currentClass: string | null;
-  isAvailable: boolean;
-}
-
-interface ClassInfo {
-  id: string;
-  name: string;
-  level: string;
-  currentTeacher: string | null;
-  studentCount: number;
-  capacity: number;
-  subjects: string[];
-  needsTeacher: boolean;
+  classes: Class[];
+  teachers: Teacher[];
 }
 
 interface Assignment {
@@ -39,144 +21,39 @@ interface Assignment {
 const TeacherAssignmentModal: React.FC<TeacherAssignmentModalProps> = ({
   isOpen,
   onClose,
-  onAssignTeacher
+  onAssignTeacher,
+  classes,
+  teachers
 }) => {
-  const [teachers] = useState<Teacher[]>([
-    {
-      id: 'traore',
-      name: 'M. Moussa Traore',
-      qualification: 'Licence en Pédagogie',
-      experience: '8 ans',
-      specializations: ['Mathématiques', 'Sciences'],
-      currentClass: 'CI A',
-      isAvailable: false
-    },
-    {
-      id: 'kone',
-      name: 'Mme Aminata Kone',
-      qualification: 'CAP Petite Enfance',
-      experience: '12 ans',
-      specializations: ['Petite Enfance', 'Psychologie Enfantine'],
-      currentClass: 'Maternelle 1A',
-      isAvailable: false
-    },
-    {
-      id: 'sidibe',
-      name: 'M. Ibrahim Sidibe',
-      qualification: 'Licence en Lettres Modernes',
-      experience: '5 ans',
-      specializations: ['Littérature', 'Histoire'],
-      currentClass: 'CE2B',
-      isAvailable: false
-    },
-    {
-      id: 'coulibaly',
-      name: 'Mlle Fatoumata Coulibaly',
-      qualification: 'Licence en Sciences de l\'Éducation',
-      experience: '3 ans',
-      specializations: ['Pédagogie', 'Psychologie'],
-      currentClass: null,
-      isAvailable: true
-    },
-    {
-      id: 'sangare',
-      name: 'M. Sekou Sangare',
-      qualification: 'Maîtrise en Sciences Naturelles',
-      experience: '15 ans',
-      specializations: ['Sciences Naturelles', 'Environnement'],
-      currentClass: null,
-      isAvailable: true
-    },
-    {
-      id: 'diarra',
-      name: 'M. Bakary Diarra',
-      qualification: 'Licence en Mathématiques',
-      experience: '6 ans',
-      specializations: ['Mathématiques', 'Physique'],
-      currentClass: null,
-      isAvailable: true
-    },
-    {
-      id: 'keita',
-      name: 'Mme Salimata Keita',
-      qualification: 'Licence en Français',
-      experience: '4 ans',
-      specializations: ['Littérature', 'Grammaire'],
-      currentClass: null,
-      isAvailable: true
-    }
-  ]);
-
-  const [classes] = useState<ClassInfo[]>([
-    {
-      id: 'maternelle-1a',
-      name: 'Maternelle 1A',
-      level: 'Maternelle',
-      currentTeacher: 'Mme Aminata Kone',
-      studentCount: 25,
-      capacity: 30,
-      subjects: ['Éveil', 'Langage', 'Graphisme', 'Jeux éducatifs'],
-      needsTeacher: false
-    },
-    {
-      id: 'ci-a',
-      name: 'CI A',
-      level: 'CI',
-      currentTeacher: 'M. Moussa Traore',
-      studentCount: 32,
-      capacity: 35,
-      subjects: ['Français', 'Mathématiques', 'Éveil Scientifique', 'Éducation Civique'],
-      needsTeacher: false
-    },
-    {
-      id: 'ce2b',
-      name: 'CE2B',
-      level: 'CE2',
-      currentTeacher: 'M. Ibrahim Sidibe',
-      studentCount: 38,
-      capacity: 40,
-      subjects: ['Français', 'Mathématiques', 'Histoire-Géographie', 'Sciences', 'Éducation Civique'],
-      needsTeacher: false
-    },
-    {
-      id: 'cp1',
-      name: 'CP1',
-      level: 'CP',
-      currentTeacher: null,
-      studentCount: 30,
-      capacity: 35,
-      subjects: ['Français', 'Mathématiques', 'Éveil Scientifique', 'Éducation Civique', 'Dessin'],
-      needsTeacher: true
-    },
-    {
-      id: 'ce1b',
-      name: 'CE1B',
-      level: 'CE1',
-      currentTeacher: null,
-      studentCount: 28,
-      capacity: 40,
-      subjects: ['Français', 'Mathématiques', 'Histoire-Géographie', 'Sciences', 'Éducation Civique'],
-      needsTeacher: true
-    },
-    {
-      id: 'cm1b',
-      name: 'CM1B',
-      level: 'CM1',
-      currentTeacher: null,
-      studentCount: 0,
-      capacity: 45,
-      subjects: ['Français', 'Mathématiques', 'Histoire-Géographie', 'Sciences', 'Éducation Civique', 'Anglais'],
-      needsTeacher: true
-    }
-  ]);
-
   const [pendingAssignments, setPendingAssignments] = useState<Assignment[]>([]);
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [selectedClass, setSelectedClass] = useState<ClassInfo | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
+  const [selectedClass, setSelectedClass] = useState<any>(null);
 
-  const availableTeachers = teachers.filter(t => t.isAvailable);
-  const classesNeedingTeacher = classes.filter(c => c.needsTeacher);
-  const assignedClasses = classes.filter(c => !c.needsTeacher);
+  // Adapter les données pour l'interface
+  const adaptedTeachers = teachers.map(t => ({
+    id: t.id,
+    name: `${t.first_name} ${t.last_name}`,
+    qualification: t.qualification,
+    experience: t.experience,
+    specializations: t.specializations || [],
+    currentClass: classes.find(c => c.teacher_id === t.id)?.name || null,
+    isAvailable: !classes.some(c => c.teacher_id === t.id)
+  }));
+
+  const adaptedClasses = classes.map(c => ({
+    id: c.id,
+    name: c.name,
+    level: c.levels?.name || '',
+    currentTeacher: c.teachers ? `${c.teachers.first_name} ${c.teachers.last_name}` : null,
+    studentCount: c.student_count || 0,
+    capacity: c.capacity,
+    subjects: [], // À récupérer depuis level_subjects si nécessaire
+    needsTeacher: !c.teacher_id
+  }));
+
+  const availableTeachers = adaptedTeachers.filter(t => t.isAvailable);
+  const classesNeedingTeacher = adaptedClasses.filter(c => c.needsTeacher);
+  const assignedClasses = adaptedClasses.filter(c => !c.needsTeacher);
 
   const handleAssignTeacher = () => {
     if (selectedTeacher && selectedClass) {
@@ -185,7 +62,7 @@ const TeacherAssignmentModal: React.FC<TeacherAssignmentModalProps> = ({
         teacherName: selectedTeacher.name,
         classId: selectedClass.id,
         className: selectedClass.name,
-        subjects: selectedClass.subjects
+        subjects: []
       };
 
       setPendingAssignments(prev => [
@@ -210,7 +87,7 @@ const TeacherAssignmentModal: React.FC<TeacherAssignmentModalProps> = ({
     }
   };
 
-  const getTeacherSuitability = (teacher: Teacher, classInfo: ClassInfo) => {
+  const getTeacherSuitability = (teacher: any, classInfo: any) => {
     let score = 0;
     let reasons = [];
 

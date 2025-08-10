@@ -29,7 +29,7 @@ export const classService = {
           email,
           phone
         ),
-        students (id),
+        students!inner (id),
         academic_years (name)
       `)
       .eq('status', 'Actif')
@@ -40,7 +40,7 @@ export const classService = {
     // Transformer les données pour correspondre au format attendu
     return data?.map(cls => ({
       ...cls,
-      student_count: cls.students?.length || 0,
+      student_count: Array.isArray(cls.students) ? cls.students.length : 0,
       level_name: cls.levels?.name || '',
       teacher_name: cls.teachers ? `${cls.teachers.first_name} ${cls.teachers.last_name}` : 'Non assigné',
       subjects: [] // À récupérer séparément si nécessaire
