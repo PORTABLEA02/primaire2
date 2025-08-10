@@ -10,6 +10,7 @@ import SecurityModal from './SecurityModal';
 import LogsModal from './LogsModal';
 import FinancialReportsModal from './FinancialReportsModal';
 import BackupModal from './BackupModal';
+import BulletinTemplatesModal from './BulletinTemplatesModal';
 
 const Settings: React.FC = () => {
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -45,7 +46,7 @@ const Settings: React.FC = () => {
         { name: 'Niveaux et classes', action: 'academic-levels' },
         { name: 'Matières enseignées', action: 'subjects' },
         { name: 'Emplois du temps', action: 'schedule-config' },
-        { name: 'Modèles de bulletins', action: 'report-templates' }
+        { name: 'Modèles de bulletins', action: 'bulletin-templates' }
       ]
     },
     {
@@ -246,7 +247,7 @@ const Settings: React.FC = () => {
       />
 
       <AcademicLevelsModal
-        isOpen={activeModal === 'academic-levels' || activeModal === 'subjects' || activeModal === 'schedule-config' || activeModal === 'report-templates'}
+        isOpen={activeModal === 'academic-levels' || activeModal === 'subjects' || activeModal === 'schedule-config'}
         onClose={() => setActiveModal(null)}
       />
 
@@ -267,6 +268,11 @@ const Settings: React.FC = () => {
 
       <BackupModal
         isOpen={activeModal === 'backup'}
+        onClose={() => setActiveModal(null)}
+      />
+
+      <BulletinTemplatesModal
+        isOpen={activeModal === 'bulletin-templates'}
         onClose={() => setActiveModal(null)}
       />
     </div>
