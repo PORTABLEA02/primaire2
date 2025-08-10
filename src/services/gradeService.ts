@@ -120,6 +120,10 @@ export const gradeService = {
     coefficient: number,
     grades: ClassGradeEntry[]
   ) {
+    // Get the current user ID first
+    const { data: { user } } = await supabase.auth.getUser();
+    const currentUserId = user?.id;
+
     const gradeInserts = grades
       .filter(g => g.grade !== null && g.grade !== undefined)
       .map(g => ({
@@ -133,7 +137,7 @@ export const gradeService = {
         evaluation_title: evaluationTitle,
         evaluation_date: evaluationDate,
         teacher_comment: g.comment,
-        created_by: (await supabase.auth.getUser()).data.user?.id
+        created_by: currentUserId
       }));
 
     const { data, error } = await supabase
