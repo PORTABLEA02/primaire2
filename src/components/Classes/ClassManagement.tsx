@@ -2,10 +2,17 @@ import React from 'react';
 import { Plus, Users, Calendar, Settings } from 'lucide-react';
 import AddClassModal from './AddClassModal';
 import TeacherAssignmentModal from './TeacherAssignmentModal';
+import ClassDetailModal from './ClassDetailModal';
+import ClassScheduleModal from './ClassScheduleModal';
+import ChangeTeacherModal from './ChangeTeacherModal';
 
 const ClassManagement: React.FC = () => {
   const [showAddModal, setShowAddModal] = React.useState(false);
   const [showAssignmentModal, setShowAssignmentModal] = React.useState(false);
+  const [showDetailModal, setShowDetailModal] = React.useState(false);
+  const [showScheduleModal, setShowScheduleModal] = React.useState(false);
+  const [showChangeTeacherModal, setShowChangeTeacherModal] = React.useState(false);
+  const [selectedClass, setSelectedClass] = React.useState<any>(null);
   const [classes, setClasses] = React.useState([
     { 
       id: '1',
@@ -153,6 +160,36 @@ const ClassManagement: React.FC = () => {
     alert(`${assignments.length} affectation(s) enregistrée(s) avec succès !`);
   };
 
+  const handleManageClass = (classItem: any) => {
+    setSelectedClass(classItem);
+    setShowDetailModal(true);
+  };
+
+  const handleViewSchedule = (classItem: any) => {
+    setSelectedClass(classItem);
+    setShowScheduleModal(true);
+  };
+
+  const handleChangeTeacher = (classItem: any) => {
+    setSelectedClass(classItem);
+    setShowChangeTeacherModal(true);
+  };
+
+  const handleUpdateClass = (updatedClass: any) => {
+    setClasses(prev => prev.map(c => c.id === updatedClass.id ? updatedClass : c));
+  };
+
+  const handleTeacherChange = (classId: string, newTeacherId: string, newTeacherName: string) => {
+    setClasses(prev => prev.map(c => 
+      c.id === classId 
+        ? { ...c, teacherId: newTeacherId, teacher: newTeacherName }
+        : c
+    ));
+    
+    // Notification de succès
+    alert(`Enseignant changé avec succès pour ${selectedClass?.name} !`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -294,13 +331,17 @@ const ClassManagement: React.FC = () => {
                         </button>
                         <span className="text-gray-300 hidden sm:inline">|</span>
                         <button 
-                          onClick={() => window.location.hash = '#schedule'}
+                          onClick={() => handleManageClass(classItem)}
+                          onClick={() => handleViewSchedule(classItem)}
                           className="text-green-600 hover:text-green-800 text-xs sm:text-sm font-medium"
                         >
                           Planning
                         </button>
                         <span className="text-gray-300 hidden sm:inline">|</span>
-                        <button className="text-purple-600 hover:text-purple-800 text-xs sm:text-sm font-medium">
+                        <button 
+                          onClick={() => handleChangeTeacher(classItem)}
+                          className="text-purple-600 hover:text-purple-800 text-xs sm:text-sm font-medium"
+                        >
                           Changer Enseignant
                         </button>
                       </div>
@@ -358,6 +399,44 @@ const ClassManagement: React.FC = () => {
         onClose={() => setShowAssignmentModal(false)}
         onAssignTeacher={handleTeacherAssignment}
       />
+
+      {/* Class Detail Modal */}
+      {selectedClass && (
+        <ClassDetailModal
+          isOpen={showDetailModal}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedClass(null);
+          }}
+          classData={selectedClass}
+          onUpdateClass={handleUpdateClass}
+        />
+      )}
+
+      {/* Class Schedule Modal */}
+      {selectedClass && (
+        <ClassScheduleModal
+          isOpen={showScheduleModal}
+          onClose={() => {
+            setShowScheduleModal(false);
+            setSelectedClass(null);
+          }}
+          classData={selectedClass}
+        />
+      )}
+
+      {/* Change Teacher Modal */}
+      {selectedClass && (
+        <ChangeTeacherModal
+          isOpen={showChangeTeacherModal}
+          onClose={() => {
+            setShowChangeTeacherModal(false);
+            setSelectedClass(null);
+          }}
+          classData={selectedClass}
+          onChangeTeacher={handleTeacherChange}
+        />
+      )}
     </div>
   );
 };
