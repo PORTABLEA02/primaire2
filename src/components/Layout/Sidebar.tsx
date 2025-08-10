@@ -11,7 +11,7 @@ import {
   School,
   Calendar
 } from 'lucide-react';
-import { useAuth } from '../Auth/SupabaseAuthProvider';
+import { useAuth } from '../Auth/AuthProvider';
 
 interface SidebarProps {
   activeModule: string;

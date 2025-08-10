@@ -64,51 +64,6 @@ export const gradeService = {
     return data;
   },
 
-  // Récupérer les élèves d'une classe pour la saisie de notes
-  async getStudentsForGradeEntry(className: string) {
-    const { data, error } = await supabase
-      .from('students')
-      .select(`
-        id,
-        first_name,
-        last_name,
-        classes!inner (name),
-        attendance (
-          status,
-          attendance_date
-        ),
-        grades (
-          grade,
-          evaluation_date,
-          subjects (name)
-        )
-      `)
-      .eq('classes.name', className)
-      .eq('status', 'Actif')
-      .order('last_name', { ascending: true });
-
-    if (error) throw error;
-
-    return data?.map(student => {
-      // Calculer le taux de présence
-      const totalDays = 30; // Approximation pour un mois
-      const presentDays = student.attendance?.filter(a => a.status === 'Présent').length || 0;
-      const attendance = Math.round((presentDays / totalDays) * 100);
-
-      // Récupérer la dernière note
-      const lastGrade = student.grades?.[0]?.grade;
-
-      return {
-        id: student.id,
-        firstName: student.first_name,
-        lastName: student.last_name,
-        currentGrade: null,
-        previousGrade: lastGrade,
-        attendance: attendance
-      };
-    }) || [];
-  },
-
   // Saisir les notes pour une classe entière
   async enterClassGrades(
     classId: string,
@@ -120,10 +75,6 @@ export const gradeService = {
     coefficient: number,
     grades: ClassGradeEntry[]
   ) {
-    // Get the current user ID first
-    const { data: { user } } = await supabase.auth.getUser();
-    const currentUserId = user?.id;
-
     const gradeInserts = grades
       .filter(g => g.grade !== null && g.grade !== undefined)
       .map(g => ({
@@ -137,7 +88,7 @@ export const gradeService = {
         evaluation_title: evaluationTitle,
         evaluation_date: evaluationDate,
         teacher_comment: g.comment,
-        created_by: currentUserId
+        created_by: (await supabase.auth.getUser()).data.user?.id
       }));
 
     const { data, error } = await supabase

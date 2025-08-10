@@ -36,8 +36,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
   const [step, setStep] = useState<'student' | 'payment' | 'confirmation'>('student');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<Partial<PaymentData>>({
     amount: 0,
     method: 'Espèces',
@@ -46,24 +44,54 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Charger les élèves depuis Supabase
-  React.useEffect(() => {
-    if (isOpen) {
-      loadStudents();
+  // Données d'exemple des élèves
+  const students: Student[] = [
+    {
+      id: '1',
+      name: 'Kofi Mensah',
+      class: 'CM2A',
+      level: 'CM2',
+      outstandingAmount: 45000,
+      lastPayment: '2024-09-15',
+      parentPhone: '+223 70 11 22 33'
+    },
+    {
+      id: '2',
+      name: 'Fatima Diallo',
+      class: 'CE1B',
+      level: 'CE1',
+      outstandingAmount: 40000,
+      lastPayment: '2024-10-01',
+      parentPhone: '+223 75 44 55 66'
+    },
+    {
+      id: '3',
+      name: 'Amadou Kone',
+      class: 'CP2',
+      level: 'CP',
+      outstandingAmount: 35000,
+      lastPayment: '2024-08-30',
+      parentPhone: '+223 65 77 88 99'
+    },
+    {
+      id: '4',
+      name: 'Aissata Ba',
+      class: 'CE2A',
+      level: 'CE2',
+      outstandingAmount: 42000,
+      lastPayment: '2024-09-20',
+      parentPhone: '+223 78 99 00 11'
+    },
+    {
+      id: '5',
+      name: 'Ibrahim Traore',
+      class: 'CM1A',
+      level: 'CM1',
+      outstandingAmount: 0,
+      lastPayment: '2024-10-10',
+      parentPhone: '+223 70 33 44 55'
     }
-  }, [isOpen]);
-
-  const loadStudents = async () => {
-    try {
-      setLoading(true);
-      const studentsData = await paymentService.getStudentsForPayment();
-      setStudents(studentsData || []);
-    } catch (error) {
-      console.error('Erreur lors du chargement des élèves:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  ];
 
   const paymentTypes = [
     { value: 'Inscription', label: 'Frais d\'inscription', amount: 50000 },
@@ -249,16 +277,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
               </div>
 
               <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
-                {loading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="text-gray-500 mt-2">Chargement des élèves...</p>
-                  </div>
-                ) : filteredStudents.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">Aucun élève trouvé</p>
-                  </div>
-                ) : (
                 {filteredStudents.map((student) => (
                   <div
                     key={student.id}
@@ -302,7 +320,6 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
                     </div>
                   </div>
                 ))}
-                )}
               </div>
             </div>
           )}

@@ -22,7 +22,6 @@ import AddStudentModal from './AddStudentModal';
 const SupabaseStudentManagement: React.FC = () => {
   const [students, setStudents] = useState<any[]>([]);
   const [levels, setLevels] = useState<any[]>([]);
-  const [classes, setClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('all');
@@ -43,16 +42,14 @@ const SupabaseStudentManagement: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [studentsData, levelsData, statsData, classesData] = await Promise.all([
+      const [studentsData, levelsData, statsData] = await Promise.all([
         studentService.getStudents(),
         levelService.getLevels(),
-        studentService.getStudentStats(),
-        studentService.getClasses()
+        studentService.getStudentStats()
       ]);
       
       setStudents(studentsData || []);
       setLevels(levelsData || []);
-      setClasses(classesData || []);
       setStats(statsData);
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
@@ -63,10 +60,10 @@ const SupabaseStudentManagement: React.FC = () => {
 
   const handleAddStudent = async (studentData: any) => {
     try {
-      // Trouver la classe correspondante
-      const selectedClass = classes.find(c => c.id === studentData.classId);
-      if (!selectedClass) {
-        throw new Error('Classe non trouvée');
+      // Trouver le niveau correspondant à la classe
+      const level = levels.find(l => l.name === studentData.level);
+      if (!level) {
+        throw new Error('Niveau non trouvé');
       }
 
       // Créer l'élève avec les données adaptées
@@ -96,7 +93,7 @@ const SupabaseStudentManagement: React.FC = () => {
         emergencyContactName: studentData.emergencyContactName,
         emergencyContactPhone: studentData.emergencyContactPhone,
         emergencyContactRelation: studentData.emergencyContactRelation,
-        classId: studentData.classId,
+        classId: studentData.classId, // À adapter selon votre logique de classe
         enrollmentDate: studentData.enrollmentDate,
         totalFees: studentData.totalFees,
         initialPayment: studentData.initialPayment,
@@ -418,7 +415,6 @@ const SupabaseStudentManagement: React.FC = () => {
         isOpen={showAddStudentModal}
         onClose={() => setShowAddStudentModal(false)}
         onAddStudent={handleAddStudent}
-        availableClasses={classes}
       />
 
       {/* Student Detail Modal - À implémenter */}

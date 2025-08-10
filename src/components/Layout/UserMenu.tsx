@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, LogOut, Settings, Shield, ChevronDown } from 'lucide-react';
-import { useAuth } from '../Auth/SupabaseAuthProvider';
+import { useAuth } from '../Auth/AuthProvider';
 
 const UserMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);

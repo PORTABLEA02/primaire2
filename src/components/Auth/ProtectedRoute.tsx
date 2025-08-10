@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from './SupabaseAuthProvider';
+import { useAuth } from './AuthProvider';
 import { AlertCircle, Lock } from 'lucide-react';
 
 interface ProtectedRouteProps {
