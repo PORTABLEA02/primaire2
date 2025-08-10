@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, BookOpen, Save, Users, Calculator, FileText, AlertCircle, CheckCircle } from 'lucide-react';
+import { gradeService } from '../../services/gradeService';
 
 interface GradeEntryModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
   const [evaluationDate, setEvaluationDate] = useState(new Date().toISOString().split('T')[0]);
   const [coefficient, setCoefficient] = useState(1);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (selectedClass && isOpen) {
@@ -49,6 +51,7 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
   const loadClassStudents = async () => {
     try {
       setLoading(true);
+      setError(null);
       const classStudents = await gradeService.getStudentsForGradeEntry(selectedClass);
       setStudents(classStudents);
       
@@ -64,6 +67,7 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
       setGrades(initialGrades);
     } catch (error) {
       console.error('Erreur lors du chargement des élèves:', error);
+      setError('Erreur lors du chargement des élèves');
     } finally {
       setLoading(false);
     }
@@ -115,27 +119,47 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
-    
-    // Simulation de sauvegarde
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    console.log('Notes sauvegardées:', {
-      class: selectedClass,
-      subject: selectedSubject,
-      period: selectedPeriod,
-      evaluationType,
-      evaluationTitle,
-      evaluationDate,
-      coefficient,
-      grades: Object.values(grades).filter(g => g.grade !== null)
-    });
-    
-    setIsSaving(false);
-    onClose();
-    
-    // Notification de succès
-    alert(`Notes sauvegardées avec succès pour ${selectedClass} - ${selectedSubject}`);
+    try {
+      setError(null);
+      setIsSaving(true);
+      
+      // Valider les données avant sauvegarde
+      const validGrades = Object.values(grades).filter(g => g.grade !== null && g.grade !== undefined);
+      
+      if (validGrades.length === 0) {
+        setError('Aucune note à sauvegarder');
+        setIsSaving(false);
+        return;
+      }
+
+      if (!evaluationTitle.trim()) {
+        setError('Le titre de l\'évaluation est requis');
+        setIsSaving(false);
+        return;
+      }
+      
+      // Sauvegarder via le service
+      await gradeService.enterClassGrades(
+        selectedClass, // classId - à adapter selon votre structure
+        selectedSubject, // subjectId - à adapter selon votre structure  
+        selectedPeriod, // academicPeriodId - à adapter selon votre structure
+        evaluationType,
+        evaluationTitle,
+        evaluationDate,
+        coefficient,
+        validGrades
+      );
+      
+      onClose();
+      
+      // Notification de succès
+      alert(`Notes sauvegardées avec succès pour ${selectedClass} - ${selectedSubject}`);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      setError('Erreur lors de la sauvegarde des notes');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const completedGrades = Object.values(grades).filter(g => g.grade !== null).length;
@@ -170,6 +194,16 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
           </div>
         </div>
 
+        {/* Affichage des erreurs */}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg mx-6">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
         <div className="p-6">
           {/* Configuration de l'évaluation */}
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -200,7 +234,9 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
                   value={evaluationTitle}
                   onChange={(e) => setEvaluationTitle(e.target.value)}
                   placeholder="Ex: Devoir n°1, Composition..."
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    error && !evaluationTitle.trim() ? 'border-red-300' : 'border-gray-200'
+                  }`}
                 />
               </div>
 
@@ -367,7 +403,7 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
                       </td>
                     </tr>
                   ) : (
-                  {students.map((student, index) => {
+                  students.map((student, index) => {
                     const currentGrade = grades[student.id]?.grade;
                     const gradeStatus = getGradeStatus(currentGrade);
                     
@@ -452,7 +488,7 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
                         </td>
                       </tr>
                     );
-                  })}
+                  })
                   )}
                 </tbody>
               </table>
@@ -552,7 +588,7 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
               
               <button
                 onClick={handleSave}
-                disabled={completedGrades === 0 || isSaving}
+                disabled={completedGrades === 0 || isSaving || !evaluationTitle.trim()}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
                 {isSaving ? (
@@ -576,3 +612,34 @@ const GradeEntryModal: React.FC<GradeEntryModalProps> = ({
 };
 
 export default GradeEntryModal;
+
+// Fonction utilitaire pour obtenir les élèves d'une classe (fallback si le service n'est pas disponible)
+function getStudentsForClass(className: string) {
+  // Données d'exemple en cas d'erreur du service
+  return [
+    {
+      id: '1',
+      firstName: 'Aminata',
+      lastName: 'Traore',
+      currentGrade: null,
+      previousGrade: 14.5,
+      attendance: 95
+    },
+    {
+      id: '2',
+      firstName: 'Ibrahim',
+      lastName: 'Kone',
+      currentGrade: null,
+      previousGrade: 12.0,
+      attendance: 88
+    },
+    {
+      id: '3',
+      firstName: 'Fatoumata',
+      lastName: 'Diallo',
+      currentGrade: null,
+      previousGrade: 16.5,
+      attendance: 98
+    }
+  ];
+}
