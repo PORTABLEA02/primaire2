@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Calculator, BookOpen, Users, TrendingUp, CheckCircle, AlertCircle, FileText, Download } from 'lucide-react';
+import BulletinGenerationModal from './BulletinGenerationModal';
 
 interface CalculateAveragesModalProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ const CalculateAveragesModal: React.FC<CalculateAveragesModalProps> = ({
   const [selectedClass, setSelectedClass] = useState('all');
   const [calculationStep, setCalculationStep] = useState<'config' | 'calculating' | 'results'>('config');
   const [progress, setProgress] = useState(0);
+  const [showBulletinModal, setShowBulletinModal] = useState(false);
 
   // Données d'exemple des moyennes calculées
   const [classAverages] = useState<ClassAverage[]>([
@@ -654,7 +656,8 @@ const CalculateAveragesModal: React.FC<CalculateAveragesModalProps> = ({
               <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                 <h4 className="font-medium text-green-800 mb-3">Actions Recommandées</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+                  <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                    onClick={() => setShowBulletinModal(true)}>
                     Générer les Bulletins
                   </button>
                   <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
@@ -697,6 +700,14 @@ const CalculateAveragesModal: React.FC<CalculateAveragesModalProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Bulletin Generation Modal */}
+        <BulletinGenerationModal
+          isOpen={showBulletinModal}
+          onClose={() => setShowBulletinModal(false)}
+          selectedPeriod={selectedPeriod}
+          classAverages={classAverages}
+        />
       </div>
     </div>
   );
