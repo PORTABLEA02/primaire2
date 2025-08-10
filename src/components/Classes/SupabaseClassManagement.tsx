@@ -156,19 +156,7 @@ const SupabaseClassManagement: React.FC = () => {
     }
   };
 
-  // Calculer les statistiques par niveau
-  const levelStats = levels.map(level => {
-    const levelClasses = classes.filter(c => c.levels?.name === level.name);
-    const totalStudents = levelClasses.reduce((sum, c) => sum + c.student_count, 0);
-    
-    return {
-      name: level.name,
-      classes: levelClasses.length,
-      students: totalStudents,
-      color: getLevelColor(level.name)
-    };
-  });
-
+  // Helper functions - defined before usage
   const getLevelColor = (levelName: string) => {
     const colorMap: Record<string, string> = {
       'Maternelle': 'purple',
@@ -194,6 +182,19 @@ const SupabaseClassManagement: React.FC = () => {
     };
     return colorMap[color] || colorMap.blue;
   };
+
+  // Calculer les statistiques par niveau
+  const levelStats = levels.map(level => {
+    const levelClasses = classes.filter(c => c.levels?.name === level.name);
+    const totalStudents = levelClasses.reduce((sum, c) => sum + c.student_count, 0);
+    
+    return {
+      name: level.name,
+      classes: levelClasses.length,
+      students: totalStudents,
+      color: getLevelColor(level.name)
+    };
+  });
 
   // Préparer les données pour les modals
   const availableTeachers = teachers.map(t => ({
@@ -552,9 +553,12 @@ const SupabaseClassManagement: React.FC = () => {
             availableTeachers={availableTeachers.filter(t => t.isAvailable)}
           />
         </>
+        levels={levels}
       )}
     </div>
   );
 };
 
 export default SupabaseClassManagement;
+
+export default SupabaseClassManagement

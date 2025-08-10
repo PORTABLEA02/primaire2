@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { X, UserCheck, User, Mail, Phone, MapPin, Calendar, Award, BookOpen } from 'lucide-react';
+import type { Level } from '../../lib/supabase';
 
 interface AddTeacherModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddTeacher: (teacherData: NewTeacherData) => void;
   availableClasses: string[];
+  levels?: Level[];
 }
 
 interface NewTeacherData {
@@ -28,7 +30,8 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
   isOpen,
   onClose,
   onAddTeacher,
-  availableClasses
+  availableClasses,
+  levels = []
 }) => {
   const [formData, setFormData] = useState<NewTeacherData>({
     firstName: '',
