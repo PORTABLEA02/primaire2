@@ -32,6 +32,10 @@ export interface CreateStudentData {
   totalFees: number;
   initialPayment: number;
   transportMode: string;
+  paymentMethod?: string;
+  referenceNumber?: string;
+  mobileNumber?: string;
+  bankDetails?: string;
   notes?: string;
 }
 
@@ -84,6 +88,27 @@ export const studentService = {
 
   // Créer un nouvel élève
   async createStudent(studentData: CreateStudentData) {
+    // Vérifier que la classe existe et a de la place
+    const { data: classInfo, error: classError } = await supabase
+      .from('classes')
+      .select(`
+        id,
+        name,
+        capacity,
+        students (id)
+      `)
+      .eq('id', studentData.classId)
+      .single();
+
+    if (classError) {
+      throw new Error('Classe non trouvée');
+    }
+
+    const currentStudentCount = classInfo.students?.length || 0;
+    if (currentStudentCount >= classInfo.capacity) {
+      throw new Error(`La classe ${classInfo.name} est complète (${currentStudentCount}/${classInfo.capacity})`);
+    }
+
     const { data, error } = await supabase
       .from('students')
       .insert({
@@ -130,12 +155,32 @@ export const studentService = {
         .insert({
           student_id: data.id,
           amount: studentData.initialPayment,
-          payment_method: 'Espèces', // Valeur par défaut, à adapter selon vos besoins
+          payment_method: studentData.paymentMethod || 'Espèces',
           payment_type: 'Inscription',
           payment_date: studentData.enrollmentDate,
           period_description: 'Paiement d\'inscription',
+          reference_number: studentData.referenceNumber,
+          mobile_number: studentData.mobileNumber,
+          bank_details: studentData.bankDetails,
+          notes: studentData.notes,
+          status: 'Confirmé',
           processed_by: (await supabase.auth.getUser()).data.user?.id
         });
+
+      // Mettre à jour le statut de paiement de l'élève
+      const paymentStatus = studentData.initialPayment >= studentData.totalFees ? 'À jour' :
+                           studentData.initialPayment > 0 ? 'Partiel' : 'En retard';
+      
+      const outstandingAmount = Math.max(0, studentData.totalFees - studentData.initialPayment);
+
+      await supabase
+        .from('students')
+        .update({
+          paid_amount: studentData.initialPayment,
+          outstanding_amount: outstandingAmount,
+          payment_status: paymentStatus
+        })
+        .eq('id', data.id);
     }
 
     return data;
@@ -197,25 +242,20 @@ export const studentService = {
 
   // Statistiques des élèves
   async getStudentStats() {
-    const { data: totalStudents, error: totalError } = await supabase
-      .from('students')
-      .select('id', { count: 'exact' })
-      .eq('status', 'Actif');
-
-    const { data: paymentStats, error: paymentError } = await supabase
+    const { data: students, error } = await supabase
       .from('students')
       .select('payment_status')
       .eq('status', 'Actif');
 
-    if (totalError || paymentError) {
-      throw totalError || paymentError;
+    if (error) {
+      throw error;
     }
 
     const stats = {
-      total: totalStudents?.length || 0,
-      upToDate: paymentStats?.filter(s => s.payment_status === 'À jour').length || 0,
-      late: paymentStats?.filter(s => s.payment_status === 'En retard').length || 0,
-      partial: paymentStats?.filter(s => s.payment_status === 'Partiel').length || 0
+      total: students?.length || 0,
+      upToDate: students?.filter(s => s.payment_status === 'À jour').length || 0,
+      late: students?.filter(s => s.payment_status === 'En retard').length || 0,
+      partial: students?.filter(s => s.payment_status === 'Partiel').length || 0
     };
 
     return stats;

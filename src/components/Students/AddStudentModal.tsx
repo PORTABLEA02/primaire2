@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { X, User, Users, Phone, Mail, MapPin, Calendar, DollarSign, BookOpen, AlertCircle } from 'lucide-react';
+import { classService } from '../../services/classService';
+import { levelService } from '../../services/levelService';
 
 interface AddStudentModalProps {
   isOpen: boolean;
@@ -88,25 +90,35 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [availableClasses, setAvailableClasses] = useState<any[]>([]);
+  const [loadingClasses, setLoadingClasses] = useState(false);
+
+  // Charger les classes disponibles depuis Supabase
+  React.useEffect(() => {
+    loadAvailableClasses();
+  }, []);
+
+  const loadAvailableClasses = async () => {
+    try {
+      setLoadingClasses(true);
+      const classesData = await classService.getClasses();
+      setAvailableClasses(classesData || []);
+    } catch (error) {
+      console.error('Erreur lors du chargement des classes:', error);
+    } finally {
+      setLoadingClasses(false);
+    }
+  };
 
   // Classes disponibles avec leurs frais
-  const classesWithFees = [
-    { name: 'Maternelle 1A', level: 'Maternelle', fees: 300000 },
-    { name: 'Maternelle 1B', level: 'Maternelle', fees: 300000 },
-    { name: 'Maternelle 2A', level: 'Maternelle', fees: 300000 },
-    { name: 'CI A', level: 'CI', fees: 350000 },
-    { name: 'CI B', level: 'CI', fees: 350000 },
-    { name: 'CP1', level: 'CP', fees: 350000 },
-    { name: 'CP2', level: 'CP', fees: 350000 },
-    { name: 'CE1A', level: 'CE1', fees: 400000 },
-    { name: 'CE1B', level: 'CE1', fees: 400000 },
-    { name: 'CE2A', level: 'CE2', fees: 400000 },
-    { name: 'CE2B', level: 'CE2', fees: 400000 },
-    { name: 'CM1A', level: 'CM1', fees: 450000 },
-    { name: 'CM1B', level: 'CM1', fees: 450000 },
-    { name: 'CM2A', level: 'CM2', fees: 450000 },
-    { name: 'CM2B', level: 'CM2', fees: 450000 }
-  ];
+  const classesWithFees = availableClasses.map(cls => ({
+    id: cls.id,
+    name: cls.name,
+    level: cls.levels?.name || cls.level_name || '',
+    fees: cls.levels?.annual_fees || 350000,
+    capacity: cls.capacity,
+    student_count: cls.student_count || 0
+  }));
 
   const nationalities = [
     'Malienne', 'Burkinabè', 'Ivoirienne', 'Sénégalaise', 'Guinéenne', 
@@ -255,13 +267,14 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({
   };
 
   const handleClassChange = (className: string) => {
-    const selectedClass = classesWithFees.find(c => c.name === className);
+    const selectedClass = classesWithFees.find(c => c.name === className || c.id === className);
     if (selectedClass) {
       setFormData(prev => ({
         ...prev,
-        class: className,
+        class: selectedClass.name,
         level: selectedClass.level,
-        totalFees: selectedClass.fees
+        totalFees: selectedClass.fees,
+        classId: selectedClass.id
       }));
     }
   };
@@ -539,8 +552,14 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Classe *
                 </label>
+                {loadingClasses ? (
+                  <div className="flex items-center space-x-2 p-2">
+                    <Loader className="h-4 w-4 animate-spin text-blue-600" />
+                    <span className="text-sm text-gray-600">Chargement des classes...</span>
+                  </div>
+                ) : (
                 <select
-                  value={formData.class}
+                  value={formData.classId || formData.class}
                   onChange={(e) => handleClassChange(e.target.value)}
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.class ? 'border-red-300' : 'border-gray-200'
@@ -548,11 +567,12 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({
                 >
                   <option value="">Sélectionner une classe</option>
                   {classesWithFees.map(cls => (
-                    <option key={cls.name} value={cls.name}>
-                      {cls.name} ({cls.level}) - {cls.fees.toLocaleString()} FCFA/an
+                    <option key={cls.id} value={cls.id}>
+                      {cls.name} ({cls.level}) - {cls.fees.toLocaleString()} FCFA/an - {cls.student_count}/{cls.capacity} élèves
                     </option>
                   ))}
                 </select>
+                )}
                 {errors.class && <p className="text-red-500 text-sm mt-1">{errors.class}</p>}
               </div>
 
@@ -607,6 +627,12 @@ const AddStudentModal: React.FC<AddStudentModalProps> = ({
                     <p><strong>Classe:</strong> {formData.class}</p>
                     <p><strong>Niveau:</strong> {formData.level}</p>
                     <p><strong>Frais annuels:</strong> {formData.totalFees.toLocaleString()} FCFA</p>
+                    {classesWithFees.find(c => c.name === formData.class) && (
+                      <p><strong>Places disponibles:</strong> {
+                        classesWithFees.find(c => c.name === formData.class)!.capacity - 
+                        classesWithFees.find(c => c.name === formData.class)!.student_count
+                      } places</p>
+                    )}
                   </div>
                 </div>
               )}
