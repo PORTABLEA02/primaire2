@@ -11,6 +11,7 @@ import {
   School,
   Calendar
 } from 'lucide-react';
+import { useAuth } from '../Auth/AuthProvider';
 
 interface SidebarProps {
   activeModule: string;
@@ -38,6 +39,21 @@ const Sidebar: React.FC<SidebarProps> = ({
   onToggleCollapse,
   isMobile
 }) => {
+  const { user, hasPermission } = useAuth();
+
+  // Filtrer les éléments du menu selon les permissions
+  const filteredMenuItems = menuItems.filter(item => {
+    if (item.id === 'dashboard') return true; // Dashboard accessible à tous
+    if (item.id === 'students') return hasPermission('students');
+    if (item.id === 'classes') return hasPermission('classes');
+    if (item.id === 'finance') return hasPermission('finance');
+    if (item.id === 'academic') return hasPermission('academic');
+    if (item.id === 'teachers') return hasPermission('teachers');
+    if (item.id === 'schedule') return hasPermission('schedule');
+    if (item.id === 'settings') return hasPermission('settings') || hasPermission('all');
+    return false;
+  });
+
   return (
     <div className={`fixed left-0 top-0 h-full bg-white shadow-lg transition-all duration-300 z-30 ${
       isMobile 
@@ -76,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Navigation */}
       <nav className="mt-6">
-        {menuItems.map((item) => {
+        {filteredMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeModule === item.id;
           
@@ -100,6 +116,20 @@ const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
       </nav>
+
+      {/* User info in collapsed mode */}
+      {collapsed && !isMobile && user && (
+        <div className="absolute bottom-4 left-0 right-0 px-4">
+          <div className="text-center">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-2">
+              <span className="text-white text-xs font-medium">
+                {user.name.split(' ').map(n => n[0]).join('')}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 truncate">{user.role}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

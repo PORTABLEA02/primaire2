@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { AuthProvider, useAuth } from './components/Auth/AuthProvider';
+import LoginPage from './components/Auth/LoginPage';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -10,7 +13,8 @@ import TeacherManagement from './components/Teachers/TeacherManagement';
 import Settings from './components/Settings/Settings';
 import ScheduleManagement from './components/Schedule/ScheduleManagement';
 
-function App() {
+const AppContent: React.FC = () => {
+  const { isAuthenticated, login } = useAuth();
   const [activeModule, setActiveModule] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -28,26 +32,75 @@ function App() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  const handleLogin = async (credentials: { email: string; password: string; rememberMe: boolean }) => {
+    const success = await login(credentials.email, credentials.password, credentials.rememberMe);
+    if (!success) {
+      // L'erreur sera gérée par le composant LoginPage
+      return false;
+    }
+    return true;
+  };
+
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   const renderActiveModule = () => {
     switch (activeModule) {
       case 'dashboard':
-        return <Dashboard />;
+        return (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        );
       case 'students':
-        return <StudentManagement />;
+        return (
+          <ProtectedRoute requiredPermission="students">
+            <StudentManagement />
+          </ProtectedRoute>
+        );
       case 'classes':
-        return <ClassManagement />;
+        return (
+          <ProtectedRoute requiredPermission="classes">
+            <ClassManagement />
+          </ProtectedRoute>
+        );
       case 'finance':
-        return <FinanceManagement />;
+        return (
+          <ProtectedRoute requiredPermission="finance">
+            <FinanceManagement />
+          </ProtectedRoute>
+        );
       case 'academic':
-        return <AcademicManagement />;
+        return (
+          <ProtectedRoute requiredPermission="academic">
+            <AcademicManagement />
+          </ProtectedRoute>
+        );
       case 'teachers':
-        return <TeacherManagement />;
+        return (
+          <ProtectedRoute requiredPermission="teachers">
+            <TeacherManagement />
+          </ProtectedRoute>
+        );
       case 'settings':
-        return <Settings />;
+        return (
+          <ProtectedRoute requiredPermission="settings">
+            <Settings />
+          </ProtectedRoute>
+        );
       case 'schedule':
-        return <ScheduleManagement />;
+        return (
+          <ProtectedRoute requiredPermission="schedule">
+            <ScheduleManagement />
+          </ProtectedRoute>
+        );
       default:
-        return <Dashboard />;
+        return (
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        );
     }
   };
 
@@ -82,6 +135,14 @@ function App() {
         </main>
       </div>
     </div>
+  );
+};
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
