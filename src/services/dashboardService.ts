@@ -23,31 +23,55 @@ export const dashboardService = {
 
   // Récupérer les activités récentes
   async getRecentActivities(limit: number = 10) {
-    const { data, error } = await supabase
+    // First, get the activity logs with user_id
+    const { data: activityLogs, error: logsError } = await supabase
       .from('activity_logs')
       .select(`
         id,
         action,
         table_name,
         created_at,
-        user_profiles (full_name)
+        user_id
       `)
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    if (error) {
-      console.error('Erreur lors de la récupération des activités:', error);
+    if (logsError) {
+      console.error('Erreur lors de la récupération des activités:', logsError);
       return [];
     }
 
-    return data?.map(log => ({
+    if (!activityLogs || activityLogs.length === 0) {
+      return [];
+    }
+
+    // Extract unique user IDs
+    const userIds = [...new Set(activityLogs.map(log => log.user_id).filter(Boolean))];
+
+    // Fetch user profiles for these IDs
+    const { data: userProfiles, error: profilesError } = await supabase
+      .from('user_profiles')
+      .select('id, full_name')
+      .in('id', userIds);
+
+    if (profilesError) {
+      console.error('Erreur lors de la récupération des profils utilisateurs:', profilesError);
+    }
+
+    // Create a map of user ID to full name for quick lookup
+    const userMap = new Map();
+    userProfiles?.forEach(profile => {
+      userMap.set(profile.id, profile.full_name);
+    });
+
+    return activityLogs.map(log => ({
       id: log.id,
       type: log.table_name || 'système',
       title: log.action,
       description: `Action sur ${log.table_name}`,
       time: new Date(log.created_at).toLocaleString('fr-FR'),
-      user: log.user_profiles?.full_name || 'Système'
-    })) || [];
+      user: userMap.get(log.user_id) || 'Système'
+    }));
   },
 
   // Récupérer la répartition académique
