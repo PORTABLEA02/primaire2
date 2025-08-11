@@ -25,7 +25,7 @@ import { studentService } from '../../services/studentService';
 import PaymentModal from './PaymentModal';
 import PaymentDetailModal from './PaymentDetailModal';
 import OutstandingPaymentsModal from './OutstandingPaymentsModal';
-import FinancialReportsModal from './FinancialReportsModal';
+import FinancialReportsModal from '../Settings/FinancialReportsModal';
 import type { Payment, Student } from '../../lib/supabase';
 
 interface PaymentWithStudent extends Payment {

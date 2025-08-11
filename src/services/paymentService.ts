@@ -173,11 +173,11 @@ export const paymentService = {
       `)
       .gt('outstanding_amount', 0)
       .eq('status', 'Actif')
-      .order('outstanding_amount', { ascending: false });
+      .order('outstanding_amount ', { ascending: false });
 
-    const { data: payments, error } = await query;
+    const { data: payments, error: paymentError  } = await query;
 
-    if (error) throw error;
+    if (paymentError) throw error;
     return data;
   }
 };
