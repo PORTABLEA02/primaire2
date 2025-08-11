@@ -18,8 +18,9 @@ export const useSupabaseAuth = () => {
     loading: true
   });
 
-  // Separate state to trigger profile loading
-  const [shouldLoadProfile, setShouldLoadProfile] = useState<string | null>(null);
+  // Separate state to trigger profile loading outside of onAuthStateChange
+  const [profileLoadQueue, setProfileLoadQueue] = useState<string | null>(null);
+
   useEffect(() => {
     // Récupérer la session initiale
     const getInitialSession = async () => {
@@ -32,7 +33,8 @@ export const useSupabaseAuth = () => {
           session,
           loading: false
         });
-        setShouldLoadProfile(session.user.id);
+        // Queue profile loading outside of auth callback
+        setProfileLoadQueue(session.user.id);
       } else {
         setAuthState(prev => ({ ...prev, loading: false }));
       }
@@ -43,6 +45,8 @@ export const useSupabaseAuth = () => {
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        // IMPORTANT: Ne pas faire d'appels asynchrones ici pour éviter le deadlock
+        // Voir: https://github.com/supabase/supabase-js/issues/888
         if (session?.user) {
           setAuthState({
             user: session.user,
@@ -50,8 +54,8 @@ export const useSupabaseAuth = () => {
             session,
             loading: false
           });
-          // Trigger profile loading outside the callback
-          setShouldLoadProfile(session.user.id);
+          // Queue profile loading to be handled outside this callback
+          setProfileLoadQueue(session.user.id);
         } else {
           setAuthState({
             user: null,
@@ -59,7 +63,7 @@ export const useSupabaseAuth = () => {
             session: null,
             loading: false
           });
-          setShouldLoadProfile(null);
+          setProfileLoadQueue(null);
         }
       }
     );
@@ -67,21 +71,28 @@ export const useSupabaseAuth = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load profile when shouldLoadProfile changes (outside onAuthStateChange callback)
+  // Load profile when profileLoadQueue changes (outside onAuthStateChange callback)
   useEffect(() => {
-    if (shouldLoadProfile) {
+    if (profileLoadQueue) {
       const loadProfile = async () => {
         try {
-          const profile = await getUserProfile(shouldLoadProfile);
+          const profile = await getUserProfile(profileLoadQueue);
           setAuthState(prev => ({ ...prev, profile }));
         } catch (error) {
           console.error('Error loading profile:', error);
+          // En cas d'erreur, on peut réessayer après un délai
+          setTimeout(() => {
+            setProfileLoadQueue(profileLoadQueue);
+          }, 1000);
         }
       };
       
       loadProfile();
+      // Clear the queue after processing
+      setProfileLoadQueue(null);
     }
-  }, [shouldLoadProfile]);
+  }, [profileLoadQueue]);
+
   const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
     try {
       const { data, error } = await supabase
@@ -113,12 +124,19 @@ export const useSupabaseAuth = () => {
         return { success: false, error: error.message };
       }
 
-      // Mettre à jour la dernière connexion
+      // Mettre à jour la dernière connexion (en dehors du callback auth)
       if (data.user) {
-        await supabase
-          .from('user_profiles')
-          .update({ last_login: new Date().toISOString() })
-          .eq('user_id', data.user.id);
+        // Utiliser setTimeout pour éviter le deadlock
+        setTimeout(async () => {
+          try {
+            await supabase
+              .from('user_profiles')
+              .update({ last_login: new Date().toISOString() })
+              .eq('user_id', data.user.id);
+          } catch (error) {
+            console.error('Error updating last login:', error);
+          }
+        }, 100);
       }
 
       return { success: true };
