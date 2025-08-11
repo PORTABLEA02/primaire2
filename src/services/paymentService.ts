@@ -136,6 +136,8 @@ export const paymentService = {
     if (startDate) {
       query = query.gte('payment_date', startDate);
     }
+
+    const { data: payments, error } = await query;
     if (error) throw error;
 
     const totalRevenue = payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
@@ -175,9 +177,7 @@ export const paymentService = {
       .eq('status', 'Actif')
       .order('outstanding_amount ', { ascending: false });
 
-    const { data: payments, error: paymentError  } = await query;
-
-    if (paymentError) throw error;
+    if (error) throw error;
     return data;
   }
 };

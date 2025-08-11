@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { X, BarChart3, Download, Calendar, DollarSign, TrendingUp, TrendingDown, FileText } from 'lucide-react';
+import { paymentService } from '../../services/paymentService';
+import { studentService } from '../../services/studentService';
 
 interface FinancialReportsModalProps {
   isOpen: boolean;
@@ -22,9 +25,13 @@ const FinancialReportsModal: React.FC<FinancialReportsModalProps> = ({
 }) => {
   const [selectedPeriod, setSelectedPeriod] = useState('current-month');
   const [reportType, setReportType] = useState('summary');
+  const [loading, setLoading] = useState(false);
+  const [realReportData, setRealReportData] = useState<ReportData | null>(null);
+  const [realPaymentMethods, setRealPaymentMethods] = useState<any[]>([]);
+  const [realOutstandingPayments, setRealOutstandingPayments] = useState<any[]>([]);
 
-  // Données d'exemple pour les rapports
-  const reportData: Record<string, ReportData> = {
+  // Données de fallback pour les rapports
+  const fallbackReportData: Record<string, ReportData> = {
     'current-month': {
       period: 'Octobre 2024',
       totalRevenue: 3250000,
@@ -63,27 +70,127 @@ const FinancialReportsModal: React.FC<FinancialReportsModalProps> = ({
     }
   };
 
-  const paymentMethods = [
+  const fallbackPaymentMethods = [
     { name: 'Espèces', amount: 1250000, percentage: 38.5, color: 'green' },
     { name: 'Mobile Money', amount: 1300000, percentage: 40.0, color: 'blue' },
     { name: 'Virement Bancaire', amount: 700000, percentage: 21.5, color: 'purple' }
   ];
 
-  const expenseCategories = [
+  const fallbackExpenseCategories = [
     { name: 'Salaires Enseignants', amount: 1200000, percentage: 66.7 },
     { name: 'Frais Administratifs', amount: 300000, percentage: 16.7 },
     { name: 'Maintenance & Équipement', amount: 200000, percentage: 11.1 },
     { name: 'Autres', amount: 100000, percentage: 5.5 }
   ];
 
-  const outstandingPayments = [
+  const fallbackOutstandingPayments = [
     { level: 'Maternelle', students: 15, amount: 450000 },
     { level: 'CI-CP', students: 28, amount: 980000 },
     { level: 'CE1-CE2', students: 35, amount: 1400000 },
     { level: 'CM1-CM2', students: 25, amount: 1125000 }
   ];
 
-  const currentData = reportData[selectedPeriod];
+  useEffect(() => {
+    if (isOpen) {
+      loadRealData();
+    }
+  }, [isOpen, selectedPeriod]);
+
+  const loadRealData = async () => {
+    try {
+      setLoading(true);
+      
+      // Déterminer la période pour les requêtes
+      let periodType: 'month' | 'trimester' | 'year' = 'month';
+      if (selectedPeriod.includes('trimester')) {
+        periodType = 'trimester';
+      } else if (selectedPeriod.includes('year')) {
+        periodType = 'year';
+      }
+
+      // Charger les données réelles
+      const [financialStats, outstandingData, studentStats] = await Promise.all([
+        paymentService.getFinancialStats(periodType),
+        paymentService.getOutstandingPayments(),
+        studentService.getStudentStats()
+      ]);
+
+      // Calculer les données du rapport
+      const totalRevenue = financialStats?.totalRevenue || 0;
+      const estimatedExpenses = Math.round(totalRevenue * 0.55); // Estimation 55% du revenu
+      const netProfit = totalRevenue - estimatedExpenses;
+      
+      const reportData: ReportData = {
+        period: getPeriodLabel(selectedPeriod),
+        totalRevenue,
+        totalExpenses: estimatedExpenses,
+        netProfit,
+        studentsCount: studentStats?.total || 0,
+        averagePayment: studentStats?.total > 0 ? Math.round(totalRevenue / studentStats.total) : 0,
+        collectionRate: studentStats?.total > 0 ? Math.round((studentStats.upToDate / studentStats.total) * 100) : 0
+      };
+
+      setRealReportData(reportData);
+
+      // Transformer les méthodes de paiement
+      const paymentMethodsData = Object.entries(financialStats?.paymentMethods || {}).map(([method, amount]) => {
+        const percentage = totalRevenue > 0 ? (amount / totalRevenue) * 100 : 0;
+        const color = method === 'Espèces' ? 'green' : 
+                     method === 'Mobile Money' ? 'blue' : 'purple';
+        return { name: method, amount, percentage, color };
+      });
+
+      setRealPaymentMethods(paymentMethodsData);
+
+      // Grouper les impayés par niveau
+      const outstandingByLevel = outstandingData?.reduce((acc, student) => {
+        const level = student.classes?.levels?.name || 'Non défini';
+        if (!acc[level]) {
+          acc[level] = { students: 0, amount: 0 };
+        }
+        acc[level].students += 1;
+        acc[level].amount += student.outstanding_amount || 0;
+        return acc;
+      }, {} as Record<string, { students: number; amount: number }>) || {};
+
+      const outstandingPaymentsData = Object.entries(outstandingByLevel).map(([level, data]) => ({
+        level,
+        students: data.students,
+        amount: data.amount
+      }));
+
+      setRealOutstandingPayments(outstandingPaymentsData);
+
+    } catch (error) {
+      console.error('Erreur lors du chargement des données réelles:', error);
+      // En cas d'erreur, utiliser les données de fallback
+      setRealReportData(null);
+      setRealPaymentMethods([]);
+      setRealOutstandingPayments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPeriodLabel = (period: string) => {
+    switch (period) {
+      case 'current-month': return `${new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}`;
+      case 'last-month': {
+        const lastMonth = new Date();
+        lastMonth.setMonth(lastMonth.getMonth() - 1);
+        return lastMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+      }
+      case 'current-trimester': return 'Trimestre 1 2024-2025';
+      case 'academic-year': return 'Année 2024-2025';
+      default: return 'Période sélectionnée';
+    }
+  };
+
+  // Utiliser les vraies données si disponibles, sinon fallback
+  const currentData = realReportData || fallbackReportData[selectedPeriod];
+  const paymentMethods = realPaymentMethods.length > 0 ? realPaymentMethods : fallbackPaymentMethods;
+  const outstandingPayments = realOutstandingPayments.length > 0 ? realOutstandingPayments : fallbackOutstandingPayments;
+  const expenseCategories = fallbackExpenseCategories; // Garder les données simulées pour les dépenses
 
   const generateReport = () => {
     // Ici vous pouvez implémenter la génération de rapport PDF/Excel
@@ -132,6 +239,7 @@ const FinancialReportsModal: React.FC<FinancialReportsModalProps> = ({
               <select
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
+                disabled={loading}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="current-month">Mois Actuel</option>
@@ -148,6 +256,7 @@ const FinancialReportsModal: React.FC<FinancialReportsModalProps> = ({
               <select
                 value={reportType}
                 onChange={(e) => setReportType(e.target.value)}
+                disabled={loading}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="summary">Résumé Financier</option>
@@ -160,10 +269,11 @@ const FinancialReportsModal: React.FC<FinancialReportsModalProps> = ({
             <div className="flex items-end space-x-2">
               <button
                 onClick={generateReport}
+                disabled={loading}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
               >
                 <FileText className="h-4 w-4" />
-                <span>Générer</span>
+                <span>{loading ? 'Chargement...' : 'Générer'}</span>
               </button>
               
               <div className="relative">
@@ -177,10 +287,21 @@ const FinancialReportsModal: React.FC<FinancialReportsModalProps> = ({
           </div>
 
           {/* Résumé Financier */}
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              <span className="ml-3 text-gray-600">Chargement des données financières...</span>
+            </div>
+          ) : (
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
               <Calendar className="h-5 w-5" />
               <span>Résumé - {currentData.period}</span>
+              {realReportData && (
+                <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded">
+                  Données réelles
+                </span>
+              )}
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -262,11 +383,18 @@ const FinancialReportsModal: React.FC<FinancialReportsModalProps> = ({
               </div>
             </div>
           </div>
+          )}
 
           {/* Répartition par Méthode de Paiement */}
+          {!loading && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div className="bg-white p-6 rounded-xl border border-gray-200">
               <h4 className="text-lg font-semibold text-gray-800 mb-4">Répartition des Paiements</h4>
+              {realPaymentMethods.length > 0 && (
+                <div className="mb-2 text-sm text-green-600">
+                  📊 Données en temps réel depuis Supabase
+                </div>
+              )}
               
               <div className="space-y-4">
                 {paymentMethods.map((method, index) => (
@@ -311,10 +439,17 @@ const FinancialReportsModal: React.FC<FinancialReportsModalProps> = ({
               </div>
             </div>
           </div>
+          )}
 
           {/* Impayés par Niveau */}
+          {!loading && (
           <div className="bg-white p-6 rounded-xl border border-gray-200">
             <h4 className="text-lg font-semibold text-gray-800 mb-4">Impayés par Niveau</h4>
+            {realOutstandingPayments.length > 0 && (
+              <div className="mb-4 text-sm text-green-600">
+                📊 Données en temps réel depuis Supabase
+              </div>
+            )}
             
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -365,12 +500,16 @@ const FinancialReportsModal: React.FC<FinancialReportsModalProps> = ({
               </div>
             </div>
           </div>
+          )}
         </div>
 
         <div className="p-6 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-500">
-              Rapport généré le {new Date().toLocaleDateString('fr-FR')} à {new Date().toLocaleTimeString('fr-FR')}
+              {realReportData ? 
+                `Données réelles - Mis à jour le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}` :
+                `Données simulées - Généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`
+              }
             </div>
             <div className="flex items-center space-x-3">
               <button

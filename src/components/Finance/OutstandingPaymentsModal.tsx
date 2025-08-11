@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, AlertCircle, DollarSign, Phone, Mail, Search, Download, Plus, Users, TrendingDown } from 'lucide-react';
+import { X, AlertCircle, DollarSign, Phone, Mail, Search, Download, Plus, Users, TrendingDown, FileText } from 'lucide-react';
 
 interface OutstandingPaymentsModalProps {
   isOpen: boolean;

@@ -167,20 +167,6 @@ export const studentService = {
           processed_by: (await supabase.auth.getUser()).data.user?.id
         });
 
-      // Mettre à jour le statut de paiement de l'élève
-      const paymentStatus = studentData.initialPayment >= studentData.totalFees ? 'À jour' :
-                           studentData.initialPayment > 0 ? 'Partiel' : 'En retard';
-      
-      const outstandingAmount = Math.max(0, studentData.totalFees - studentData.initialPayment);
-
-      await supabase
-        .from('students')
-        .update({
-          paid_amount: studentData.initialPayment,
-          outstanding_amount: outstandingAmount,
-          payment_status: paymentStatus
-        })
-        .eq('id', data.id);
     }
 
     return data;
