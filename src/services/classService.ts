@@ -29,7 +29,7 @@ export const classService = {
           email,
           phone
         ),
-        students!inner (id),
+        students (id),
         academic_years (name)
       `)
       .eq('status', 'Actif')

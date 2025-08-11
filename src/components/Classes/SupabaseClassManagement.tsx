@@ -60,10 +60,15 @@ const SupabaseClassManagement: React.FC = () => {
       setLoading(true);
       const [classesData, levelsData, teachersData, statsData] = await Promise.all([
         classService.getClasses(),
-        levelService?.getLevels() || Promise.resolve([]),
+        levelService.getLevels(),
         teacherService.getTeachers(),
         classService.getClassStats()
       ]);
+      
+      console.log('Classes chargées:', classesData);
+      console.log('Niveaux chargés:', levelsData);
+      console.log('Enseignants chargés:', teachersData);
+      console.log('Statistiques:', statsData);
       
       setClasses(classesData || []);
       setLevels(levelsData || []);
@@ -71,6 +76,17 @@ const SupabaseClassManagement: React.FC = () => {
       setStats(statsData);
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
+      // Afficher des données par défaut en cas d'erreur
+      setClasses([]);
+      setLevels([]);
+      setTeachers([]);
+      setStats({
+        total: 0,
+        withTeacher: 0,
+        withoutTeacher: 0,
+        totalStudents: 0,
+        averageSize: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -461,13 +477,18 @@ const SupabaseClassManagement: React.FC = () => {
         {classes.length === 0 && !loading && (
           <div className="text-center py-12">
             <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 mb-2">Aucune classe configurée</p>
+            <p className="text-gray-500 mb-2">
+              {searchTerm ? 'Aucune classe trouvée' : 'Aucune classe configurée'}
+            </p>
+            <p className="text-sm text-gray-400 mb-4">
+              Vérifiez que vous êtes connecté à Supabase et que des classes existent dans la base de données.
+            </p>
             <button 
               onClick={() => setShowAddModal(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 mx-auto"
             >
               <Plus className="h-4 w-4" />
-              <span>Créer la première classe</span>
+              <span>Ajouter une classe</span>
             </button>
           </div>
         )}

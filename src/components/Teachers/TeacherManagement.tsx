@@ -17,7 +17,9 @@ import {
   Users,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  Loader,
+  RefreshCw
 } from 'lucide-react';
 import AddTeacherModal from './AddTeacherModal';
 import { teacherService } from '../../services/teacherService';
