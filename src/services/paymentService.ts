@@ -111,29 +111,31 @@ export const paymentService = {
 
   // Statistiques financières
   async getFinancialStats(period?: 'month' | 'trimester' | 'year') {
-    let dateFilter = '';
     const now = new Date();
+    let startDate = '';
     
     switch (period) {
       case 'month':
-        dateFilter = `payment_date >= '${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-01'`;
+        startDate = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-01`;
         break;
       case 'trimester':
-        // Logique pour trimestre actuel
-        dateFilter = `payment_date >= '2024-10-01'`;
+        startDate = '2024-10-01'; // Début de l'année scolaire
         break;
       case 'year':
-        dateFilter = `payment_date >= '2024-10-01'`;
+        startDate = '2024-10-01'; // Début de l'année scolaire
         break;
       default:
-        dateFilter = `payment_date >= '${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-01'`;
+        startDate = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-01`;
     }
 
-    const { data: payments, error } = await supabase
+    let query = supabase
       .from('payments')
       .select('amount, payment_method, payment_type, payment_date')
       .eq('status', 'Confirmé');
 
+    if (startDate) {
+      query = query.gte('payment_date', startDate);
+    }
     if (error) throw error;
 
     const totalRevenue = payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
@@ -172,6 +174,8 @@ export const paymentService = {
       .gt('outstanding_amount', 0)
       .eq('status', 'Actif')
       .order('outstanding_amount', { ascending: false });
+
+    const { data: payments, error } = await query;
 
     if (error) throw error;
     return data;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, DollarSign, User, Calendar, CreditCard, Smartphone, Building, Search, AlertCircle, CheckCircle } from 'lucide-react';
+import { studentService } from '../../services/studentService';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -7,14 +8,22 @@ interface PaymentModalProps {
   onAddPayment: (paymentData: PaymentData) => void;
 }
 
-interface Student {
+interface StudentForPayment {
   id: string;
-  name: string;
-  class: string;
-  level: string;
-  outstandingAmount: number;
-  lastPayment?: string;
-  parentPhone?: string;
+  first_name: string;
+  last_name: string;
+  classes?: {
+    name: string;
+    levels?: {
+      name: string;
+    };
+  };
+  outstanding_amount: number;
+  total_fees: number;
+  paid_amount?: number;
+  father_phone?: string;
+  mother_phone?: string;
+  parent_email: string;
 }
 
 interface PaymentData {
@@ -35,7 +44,9 @@ interface PaymentData {
 const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayment }) => {
   const [step, setStep] = useState<'student' | 'payment' | 'confirmation'>('student');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<StudentForPayment | null>(null);
+  const [students, setStudents] = useState<StudentForPayment[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
   const [paymentData, setPaymentData] = useState<Partial<PaymentData>>({
     amount: 0,
     method: 'Espèces',
@@ -44,54 +55,25 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Données d'exemple des élèves
-  const students: Student[] = [
-    {
-      id: '1',
-      name: 'Kofi Mensah',
-      class: 'CM2A',
-      level: 'CM2',
-      outstandingAmount: 45000,
-      lastPayment: '2024-09-15',
-      parentPhone: '+223 70 11 22 33'
-    },
-    {
-      id: '2',
-      name: 'Fatima Diallo',
-      class: 'CE1B',
-      level: 'CE1',
-      outstandingAmount: 40000,
-      lastPayment: '2024-10-01',
-      parentPhone: '+223 75 44 55 66'
-    },
-    {
-      id: '3',
-      name: 'Amadou Kone',
-      class: 'CP2',
-      level: 'CP',
-      outstandingAmount: 35000,
-      lastPayment: '2024-08-30',
-      parentPhone: '+223 65 77 88 99'
-    },
-    {
-      id: '4',
-      name: 'Aissata Ba',
-      class: 'CE2A',
-      level: 'CE2',
-      outstandingAmount: 42000,
-      lastPayment: '2024-09-20',
-      parentPhone: '+223 78 99 00 11'
-    },
-    {
-      id: '5',
-      name: 'Ibrahim Traore',
-      class: 'CM1A',
-      level: 'CM1',
-      outstandingAmount: 0,
-      lastPayment: '2024-10-10',
-      parentPhone: '+223 70 33 44 55'
+  // Charger les élèves depuis Supabase
+  React.useEffect(() => {
+    if (isOpen) {
+      loadStudents();
     }
-  ];
+  }, [isOpen]);
+
+  const loadStudents = async () => {
+    try {
+      setLoadingStudents(true);
+      const studentsData = await studentService.getStudents();
+      setStudents(studentsData || []);
+    } catch (error) {
+      console.error('Erreur lors du chargement des élèves:', error);
+      setStudents([]);
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
 
   const paymentTypes = [
     { value: 'Inscription', label: 'Frais d\'inscription', amount: 50000 },
@@ -114,8 +96,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
   };
 
   const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.class.toLowerCase().includes(searchTerm.toLowerCase())
+    `${student.first_name} ${student.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (student.classes?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const validatePayment = () => {
@@ -141,13 +123,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleStudentSelect = (student: Student) => {
+  const handleStudentSelect = (student: StudentForPayment) => {
     setSelectedStudent(student);
     setPaymentData(prev => ({
       ...prev,
       studentId: student.id,
-      studentName: student.name,
-      studentClass: student.class
+      studentName: `${student.first_name} ${student.last_name}`,
+      studentClass: student.classes?.name || 'Non assigné'
     }));
     setStep('payment');
   };
@@ -174,8 +156,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
     if (validatePayment() && selectedStudent) {
       const completePaymentData: PaymentData = {
         studentId: selectedStudent.id,
-        studentName: selectedStudent.name,
-        studentClass: selectedStudent.class,
+        studentName: `${selectedStudent.first_name} ${selectedStudent.last_name}`,
+        studentClass: selectedStudent.classes?.name || 'Non assigné',
         amount: paymentData.amount!,
         method: paymentData.method!,
         type: paymentData.type!,
@@ -276,51 +258,81 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
-                {filteredStudents.map((student) => (
-                  <div
-                    key={student.id}
-                    onClick={() => handleStudentSelect(student)}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                          <User className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-gray-800">{student.name}</h3>
-                          <p className="text-sm text-gray-600">{student.class} • {student.level}</p>
-                          {student.parentPhone && (
-                            <p className="text-xs text-gray-500">📱 {student.parentPhone}</p>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="text-right">
-                        {student.outstandingAmount > 0 ? (
+              {loadingStudents ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-3 text-gray-600">Chargement des élèves...</span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
+                  {filteredStudents.map((student) => (
+                    <div
+                      key={student.id}
+                      onClick={() => handleStudentSelect(student)}
+                      className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <User className="h-6 w-6 text-blue-600" />
+                          </div>
                           <div>
-                            <p className="text-lg font-bold text-red-600">
-                              {student.outstandingAmount.toLocaleString()} FCFA
+                            <h3 className="font-medium text-gray-800">
+                              {student.first_name} {student.last_name}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {student.classes?.name || 'Non assigné'} • {student.classes?.levels?.name || 'Niveau non défini'}
                             </p>
-                            <p className="text-xs text-red-500">Montant dû</p>
+                            {(student.father_phone || student.mother_phone) && (
+                              <p className="text-xs text-gray-500">
+                                📱 {student.father_phone || student.mother_phone}
+                              </p>
+                            )}
                           </div>
-                        ) : (
-                          <div>
-                            <p className="text-lg font-bold text-green-600">À jour</p>
-                            <p className="text-xs text-green-500">Aucun impayé</p>
+                        </div>
+                        
+                        <div className="text-right">
+                          {(student.outstanding_amount || 0) > 0 ? (
+                            <div>
+                              <p className="text-lg font-bold text-red-600">
+                                {(student.outstanding_amount || 0).toLocaleString()} FCFA
+                              </p>
+                              <p className="text-xs text-red-500">Montant dû</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p className="text-lg font-bold text-green-600">À jour</p>
+                              <p className="text-xs text-green-500">Aucun impayé</p>
+                            </div>
+                          )}
+                          <div className="mt-1">
+                            <div className="w-16 bg-gray-200 rounded-full h-1">
+                              <div 
+                                className="bg-green-600 h-1 rounded-full"
+                                style={{ 
+                                  width: `${Math.min(((student.paid_amount || 0) / student.total_fees) * 100, 100)}%` 
+                                }}
+                              ></div>
+                            </div>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {Math.round(((student.paid_amount || 0) / student.total_fees) * 100)}% payé
+                            </p>
                           </div>
-                        )}
-                        {student.lastPayment && (
-                          <p className="text-xs text-gray-400 mt-1">
-                            Dernier: {new Date(student.lastPayment).toLocaleDateString('fr-FR')}
-                          </p>
-                        )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                  
+                  {filteredStudents.length === 0 && !loadingStudents && (
+                    <div className="text-center py-8">
+                      <User className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">
+                        {searchTerm ? 'Aucun élève trouvé pour cette recherche' : 'Aucun élève disponible'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -334,8 +346,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
                     <User className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-blue-800">{selectedStudent.name}</h3>
-                    <p className="text-sm text-blue-600">{selectedStudent.class} • {selectedStudent.level}</p>
+                    <h3 className="font-medium text-blue-800">{selectedStudent.first_name} {selectedStudent.last_name}</h3>
+                    <p className="text-sm text-blue-600">{selectedStudent.classes?.name || 'Non assigné'} • {selectedStudent.classes?.levels?.name || 'Non défini'}</p>
                   </div>
                   <button
                     onClick={() => setStep('student')}
@@ -383,20 +395,31 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
 
                 {/* Month (for Mensualité) */}
                 {paymentData.type === 'Scolarité' && (
-                  <div>
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                      <h4 className="font-medium text-blue-800 mb-2">Information Scolarité</h4>
-                      {selectedStudent && (
-                        <div className="space-y-2 text-sm text-blue-700">
-                          <p><strong>Classe:</strong> {selectedStudent.class}</p>
-                          <p><strong>Frais annuels:</strong> {scolariteAnnuelle[selectedStudent.level as keyof typeof scolariteAnnuelle]?.toLocaleString() || 'Non défini'} FCFA</p>
-                          <p><strong>Déjà payé:</strong> {(selectedStudent.outstandingAmount > 0 ? 
-                            (scolariteAnnuelle[selectedStudent.level as keyof typeof scolariteAnnuelle] - selectedStudent.outstandingAmount) : 
-                            scolariteAnnuelle[selectedStudent.level as keyof typeof scolariteAnnuelle]
-                          )?.toLocaleString()} FCFA</p>
-                          <p><strong>Reste à payer:</strong> {selectedStudent.outstandingAmount.toLocaleString()} FCFA</p>
+                  <div className="md:col-span-2">
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200 mb-4">
+                      <h4 className="font-medium text-blue-800 mb-3">Information Scolarité</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-600">Classe actuelle:</p>
+                          <p className="font-medium">{selectedStudent.classes?.name || 'Non assigné'}</p>
                         </div>
-                      )}
+                        <div>
+                          <p className="text-gray-600">Niveau:</p>
+                          <p className="font-medium">{selectedStudent.classes?.levels?.name || 'Non défini'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Frais annuels:</p>
+                          <p className="font-medium">{selectedStudent.total_fees.toLocaleString()} FCFA</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Déjà payé:</p>
+                          <p className="font-medium">{(selectedStudent.paid_amount || 0).toLocaleString()} FCFA</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">Reste à payer:</p>
+                          <p className="font-medium">{(selectedStudent.outstanding_amount || 0).toLocaleString()} FCFA</p>
+                        </div>
+                      </div>
                     </div>
                     
                     <div>
@@ -545,7 +568,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onAddPayme
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Élève:</span>
-                    <span className="font-medium">{selectedStudent.name} ({selectedStudent.class})</span>
+                    <span className="font-medium">
+                      {selectedStudent.first_name} {selectedStudent.last_name} ({selectedStudent.classes?.name})
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Type:</span>

@@ -8,7 +8,7 @@ import Header from './components/Layout/Header';
 import SupabaseDashboard from './components/Dashboard/SupabaseDashboard';
 import SupabaseStudentManagement from './components/Students/SupabaseStudentManagement';
 import SupabaseClassManagement from './components/Classes/SupabaseClassManagement';
-import FinanceManagement from './components/Finance/FinanceManagement';
+import SupabaseFinanceManagement from './components/Finance/SupabaseFinanceManagement';
 import AcademicManagement from './components/Academic/AcademicManagement';
 import TeacherManagement from './components/Teachers/TeacherManagement';
 import Settings from './components/Settings/Settings';
@@ -73,7 +73,7 @@ const AppContent: React.FC = () => {
       case 'finance':
         return (
           <ProtectedRoute requiredPermission="finance">
-            <FinanceManagement />
+            <SupabaseFinanceManagement />
           </ProtectedRoute>
         );
       case 'academic':
